@@ -8,11 +8,11 @@ player_controller = PlayerController()
 col1, col2 = st.columns(2)
 
 with col1:
-    selected_player1 = st.selectbox("Player", options=player_controller.model.elements_data['web_name'].sort_values(), key="Player 1")
+    selected_player1 = st.selectbox("Type player name...", options=player_controller.model.elements_data['web_name'].sort_values(), key="Player 1")
     player_controller.display_player_info(selected_player1)
 
 with col2:
-    selected_player2 = st.selectbox("Player", options=player_controller.model.elements_data['web_name'].sort_values(), key="Player 2")
+    selected_player2 = st.selectbox("Type player name...", options=player_controller.model.elements_data['web_name'].sort_values(), key="Player 2")
     player_controller.display_player_info(selected_player2)
 
 # # Define the base URL

@@ -12,7 +12,7 @@ class PlayerModel:
 		self.elements_data = self.load_and_preprocess_elements_data()
 		self.fixtures_data = self.load_and_preprocess_fixtures_data()
 		self.history_data = self.load_and_preprocess_history_data()
-		self.history_data = None
+		self.history_past_data = None
 
 
 	def load_and_preprocess_elements_data(self):
