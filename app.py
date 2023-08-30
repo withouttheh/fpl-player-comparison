@@ -1,6 +1,9 @@
 import streamlit as st
 from controllers.player_controller import PlayerController
 
+st.set_page_config(layout="wide")
+
+
 st.title("FPL Player Info App")
 
 player_controller = PlayerController()

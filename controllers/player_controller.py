@@ -25,6 +25,7 @@ class PlayerController:
 		column_names = ['team_h', 'team_a']
 		fixtures_data = fixtures_preprocessor.preprocess_fixtures(column_names)
 		fixtures_data['opponent'] = fixtures_data.apply(lambda row: row['team_h'] if row['team_a'] == player_team else row['team_a'], axis=1)
+		
 
 		#Past fixtures
 		history_loader = HistoryLoader(self.model.base_url, player_id)
@@ -32,6 +33,7 @@ class PlayerController:
 		history_preprocessor = HistoryPreprocessor(history_data, self.model.teams_data)
 		column_names = ['opponent_team']
 		history_data = history_preprocessor.preprocess_history(column_names)
+		print(history_data.columns)
 
 
 		self.view.render_player_info(player_data, fixtures_data, history_data)

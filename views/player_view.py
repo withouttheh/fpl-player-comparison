@@ -1,19 +1,24 @@
 import streamlit as st
+import plotly.express as px
+from utils.plots.radar_chart import RadarChartPlotter
+from utils.config import colors, fdr
 
 class PlayerView:
 	def render_player_info(self, player_data, fixtures_data, history_data):
 		st.markdown(f"<p style='text-align: center;'><strong>Team:</strong>  {player_data['team'].values[0]}</p>", unsafe_allow_html=True)
+		st.markdown(f"<p style='text-align: center;'><strong>Position:</strong>  {player_data['position'].values[0]}</p>", unsafe_allow_html=True)
 		st.markdown(f"<p style='text-align: center;'><strong>Selected by:  </strong>{player_data['selected_by_percent'].values[0]}%</p>", unsafe_allow_html=True)
 		st.markdown(f"<p style='text-align: center;'><strong>Price:  </strong>{player_data['now_cost'].values[0] / 10}</p>", unsafe_allow_html=True)
 		
 		# Render the fixtures table
 		st.markdown("<p style='text-align: center;'><strong>Upcoming Fixtures:</strong></p>", unsafe_allow_html=True)
 		
-		fixtures_table_html = "<table style='margin-bottom: 16px;'><tr>"
+		fixtures_table_html = "<table style='margin-bottom: 16px;  margin-left: auto; margin-right: auto;'><tr>"
 
 		for _, row in fixtures_data.head(6).iterrows():
 			opponent_team = row['opponent']
-			fixtures_table_html += f"<td>{opponent_team}</td>"
+			difficulty = row['difficulty']
+			fixtures_table_html += f"<td style='background-color:{fdr[difficulty]}; color:{'white' if difficulty > 3 else 'black'}'>{opponent_team}</td>"
 
 		fixtures_table_html += "</tr></table>"
 
@@ -22,8 +27,8 @@ class PlayerView:
 		# Render the history table
 		st.markdown("<p style='text-align: center;'><strong>Past Fixtures:</strong></p>", unsafe_allow_html=True)
 		
-		history_table_html = "<table style='margin-bottom: 16px; margin-left: auto; margin-right: auto;'>"
-		history_table_html += "<tr><th>Team</th><th>Mins</th><th>Pts</th><th>BP</th><th>GS</th><th>A</th><th>GC</th></tr>"
+		history_table_html = f"<table style='margin-bottom: 16px; margin-left: auto; margin-right: auto;'>"
+		history_table_html += f"<tr style='background-color:{colors['purple']}; color: white'><th>Team</th><th>Mins</th><th>Pts</th><th>BP</th><th>GS</th><th>A</th><th>GC</th></tr>"
 
 		for _, row in history_data.head(5).iterrows():
 			opponent_team = row['opponent_team']
@@ -38,4 +43,26 @@ class PlayerView:
 		history_table_html += "</table>"
 
 		st.markdown(history_table_html, unsafe_allow_html=True)
+
+		# Render radar chart
+
+		df = player_data[['expected_goals_per_90', 'expected_assists_per_90','expected_goal_involvements_per_90', 'expected_goals_conceded_per_90']]
+		df.columns = [['xG90', 'xA90','xGI90', 'xGC90']]
+		radar_chart_values = [float(value) for value in list(df.values[0])]
+		radar_chart_labels = list(df.columns)
+
+		# chart_plotter = RadarChartPlotter()
+		# st.pyplot(chart_plotter.plot_customized_chart( radar_chart_values, radar_chart_labels))
+
+
+
+
+
+		fig = px.line_polar(df, r=radar_chart_values, theta=radar_chart_labels, line_close=True)
+		fig.update_traces(fill='toself')
+		st.plotly_chart(fig, use_container_width=True)
+		# st.write(df.values[0])
+		# st.write(df.columns)
+
+
 	

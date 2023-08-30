@@ -13,6 +13,9 @@ class BasePreprocessor:
 		team_mapping = dict(zip(self.teams_data['id'], self.teams_data['short_name']))
 		return team_mapping
 
+	def map_element_type_to_position(self):
+		self.data['position'] = self.data['element_type'].map({1: 'GK', 2: 'DEF', 3: 'MID', 4: 'FWD'})
+
 	def replace_team_ids_with_names(self, column_names):
 		if self.team_mapping:
 			for column_name in column_names:
