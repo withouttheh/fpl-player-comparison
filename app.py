@@ -1,15 +1,15 @@
 import streamlit as st
 from controllers.player_controller import PlayerController
 
-st.set_page_config(layout="wide")
+st.set_page_config()
 
 
-st.title("FPL Player Info App")
-
+st.markdown(f"<p style='text-align: center; font-size: 32px; font-weight: 700; margin-bottom: 16px;'>FPL Player Comparison</p>", unsafe_allow_html=True)
+		
 player_controller = PlayerController()
  
 col1, col2 = st.columns(2)
-
+ 
 with col1:
     selected_player1 = st.selectbox("Type player name...", options=player_controller.model.elements_data['web_name'].sort_values(), key="Player 1")
     player_controller.display_player_info(selected_player1)
@@ -18,47 +18,24 @@ with col2:
     selected_player2 = st.selectbox("Type player name...", options=player_controller.model.elements_data['web_name'].sort_values(), key="Player 2")
     player_controller.display_player_info(selected_player2)
 
-# # Define the base URL
-# base_url = "https://fantasy.premierleague.com/api"
+columns = ['total_points', 'minutes',
+       'goals_scored', 'assists', 'clean_sheets', 'goals_conceded',
+       'own_goals', 'penalties_saved', 'penalties_missed', 'yellow_cards',
+       'red_cards', 'saves', 'bonus', 'bps', 'influence', 'creativity',
+       'threat', 'ict_index', 'expected_goals', 'expected_assists',
+       'expected_goal_involvements', 'expected_goals_conceded', 'value',
+       'transfers_balance', 'selected', 'transfers_in', 'transfers_out']
 
-# # Create an instance of FplStatsHub
-# fpl_statshub = FplStatsHub(base_url)
+print(player_controller.model.history_data[columns])
 
-# # Load and preprocess data
-# fpl_statshub.load_and_preprocess_data()
+season_stats = st.selectbox("Select stat...", options=columns, key="Stats")
 
-# # # Display the processed data using st.write
-# # st.title('FPL StatsHub')
+slider_min = 1
+slider_max = player_controller.model.history_data['fixture'].size	
 
-# # st.subheader('Elements Data')
-# # st.write(fpl_statshub.elements_data)
+gw_slider = st.slider('Gameweek', min_value=slider_min, max_value=slider_max, value=(slider_min, slider_max), key='gw_slider')
 
-# # st.subheader('Fixtures Data')
-# # st.write(fpl_statshub.fixtures_data)
-
-# # st.subheader('History Data')
-# # st.write(fpl_statshub.history_data)
-
-# # st.subheader('History Past Data')
-# # st.write(fpl_statshub.history_past_data)
-
-# col1, col2 = st.columns(2)
-
-# st.subheader('Raw data')
-
-# with col1:
-#     st.header("Column 1")
-#     st.write("This is the first column.")
-#     selected_player1 = st.selectbox("Player", options=fpl_statshub.elements_data['web_name'].sort_values(), key="Player 1")
-#     st.write('You selected:', selected_player1)
-#     fpl_statshub.display_player_info(col1, selected_player1)
-
-# with col2:
-#     st.header("Column 2")
-#     st.write("This is the third column.")
-#     selected_player2 = st.selectbox("Player", options=fpl_statshub.elements_data['web_name'].sort_values(), key="Player 2")
-#     st.write('You selected:', selected_player2)
-#     fpl_statshub.display_player_info(col2, selected_player2)
-
-
+players = [selected_player1, selected_player2]
+player_controller.plot_side_by_side_bar(players, gw_slider, season_stats)
+player_controller.plot_side_by_side_line(players, gw_slider, season_stats)
 

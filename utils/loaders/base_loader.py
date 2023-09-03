@@ -3,7 +3,7 @@ import requests
 class BaseLoader:
     def __init__(self, base_url):
         self.base_url = base_url
-
+     
     def load_data(self, endpoint):
         """Load data from the specified endpoint."""
 

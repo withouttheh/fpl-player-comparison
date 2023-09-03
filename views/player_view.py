@@ -51,18 +51,9 @@ class PlayerView:
 		radar_chart_values = [float(value) for value in list(df.values[0])]
 		radar_chart_labels = list(df.columns)
 
-		# chart_plotter = RadarChartPlotter()
-		# st.pyplot(chart_plotter.plot_customized_chart( radar_chart_values, radar_chart_labels))
-
-
-
-
-
-		fig = px.line_polar(df, r=radar_chart_values, theta=radar_chart_labels, line_close=True)
-		fig.update_traces(fill='toself')
+	def render_side_by_side_bar(self, fig):
 		st.plotly_chart(fig, use_container_width=True)
-		# st.write(df.values[0])
-		# st.write(df.columns)
 
-
+	def render_side_by_side_line(self, fig):
+		st.plotly_chart(fig, use_container_width=True)
 	
