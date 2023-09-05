@@ -1,7 +1,5 @@
 # FPL Player Comparison
 
-
-
 ## Table of Contents
 
 - [Project Overview](#project-overview)
@@ -17,7 +15,9 @@
 
 ## Project Overview
 
-Briefly introduce your project. Explain what it does, why it's useful, and who it's for. Mention any technologies or tools used.
+FPL Player Comparison is a data-driven web application designed to provide users with a user-friendly platform for comparing Fantasy Premier League (FPL) players. FPL is a popular online fantasy football game that allows users to create and manage virtual teams based on real-world Premier League players.
+
+The application aims to enhance the FPL experience by offering a range of features and tools to help FPL enthusiasts make informed decisions about their fantasy teams. With FPL Player Comparison, users can access and visualize player statistics, track performance over multiple gameweeks, compare players, and much more. Whether you're a casual FPL player or a seasoned pro, this app has something to offer.
 
 ## Demo
 
@@ -25,11 +25,10 @@ Include a link or screenshot(s) showcasing your project in action. Provide a vis
 
 ## Features
 
-List and describe the key features of your project. Highlight what makes your project unique or better than existing solutions.
-
-- Feature 1: Description
-- Feature 2: Description
-- Feature 3: Description
+- Player Data: Access detailed information about each player in the Premier League, including statistics, team affiliation, and price.
+- Fixtures and Results: Stay up-to-date with upcoming fixtures, past results, and opponent difficulty ratings.
+- Player Comparison: Compare the performance of multiple players on a gameweek-by-gameweek basis to make strategic decisions.
+- User-Friendly Interface: The app offers an intuitive and user-friendly interface that caters to both beginners and experts
 
 ## Getting Started
 
@@ -57,7 +56,7 @@ Libraries or dependencies that need to be installed before using the project.
 Provide detailed installation instructions, including code snippets if necessary.
 
 ```
-Example:
+
 1. Clone the repository:
    ```
    git clone https://github.com/withouttheh/fpl-player-comparison.git
@@ -70,15 +69,15 @@ Example:
 
 3. Install dependencies:
    ```
-   npm install
+   pip install -r requirements.txt
    ```
 
 4. Start the application:
    ```
-   npm start
+   streamlit run app.py
    ```
 
-5. Open your browser and access http://localhost:3000
+5. Open your browser and access http://localhost:8501
 ```
 
 ## Usage
