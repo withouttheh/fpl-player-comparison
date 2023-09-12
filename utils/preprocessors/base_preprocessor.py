@@ -22,4 +22,6 @@ class BasePreprocessor:
 				self.data[column_name] = self.data[column_name].map(self.team_mapping)
 		return self.data
 
+	def create_full_name(self):
+		self.data['full_name'] = self.data['first_name'] + ' ' + self.data['second_name']  
 

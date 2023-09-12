@@ -40,8 +40,8 @@ class PlayerModel:
 		column_names = ['opponent_team']
 		return history_preprocessor.preprocess_history(column_names)
 
-	def get_player_data(self, web_name):
-		return self.elements_data.loc[self.elements_data['web_name'] == web_name]
+	def get_player_data(self, full_name):
+		return self.elements_data.loc[self.elements_data['full_name'] == full_name]
 
 	def get_fixtures_data(self, player_id):
 		fixtures_loader = FixturesLoader(self.base_url, player_id)

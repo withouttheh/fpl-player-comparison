@@ -14,8 +14,8 @@ class PlayerController:
 		self.view = PlayerView()
 
 
-	def display_player_info(self, web_name):
-		player_data = self.model.get_player_data(web_name)
+	def display_player_info(self, full_name):
+		player_data = self.model.get_player_data(full_name)
 		player_id = player_data['id'].values[0]
 		player_team = player_data['team'].values[0]
 
