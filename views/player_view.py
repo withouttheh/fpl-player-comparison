@@ -30,7 +30,7 @@ class PlayerView:
 		history_table_html = f"<table style='margin-bottom: 16px; margin-left: auto; margin-right: auto;'>"
 		history_table_html += f"<tr style='background-color:{colors['purple']}; color: white'><th>Team</th><th>Mins</th><th>Pts</th><th>BP</th><th>GS</th><th>A</th><th>GC</th></tr>"
 
-		for _, row in history_data.tail(5).iterrows():
+		for _, row in history_data.iterrows(): 
 			opponent_team = row['opponent_team']
 			minutes = row['minutes']
 			points = row['total_points']

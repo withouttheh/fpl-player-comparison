@@ -7,6 +7,7 @@ from utils.config import base_url
 
 import plotly.express as px
 import pandas as pd
+import datetime
 
 class PlayerController:
 	def __init__(self):
@@ -36,6 +37,11 @@ class PlayerController:
 		history_preprocessor = HistoryPreprocessor(history_data, self.model.teams_data)
 		column_names = ['opponent_team']
 		history_data = history_preprocessor.preprocess_history(column_names)
+
+		# current_time = datetime.datetime.utcnow()
+		# print(datetime.datetime.utcnow())
+		# history_data['kickoff_time'] = pd.to_datetime(history_data['kickoff_time'])
+		# history_data = history_data[history_data['kickoff_time'] < current_time]
 
 		self.view.render_player_info(player_data, fixtures_data, history_data)
 
@@ -70,8 +76,7 @@ class PlayerController:
 
 			history_loader = HistoryLoader(self.model.base_url, player_id)
 			history_data = history_loader.get_history_data()
-			print(history_data.info())
-			
+			 
 			selected_columns = ['influence', 'creativity', 'threat', 'ict_index', 'expected_goals', 'expected_assists', 'expected_goal_involvements', 'expected_goals_conceded']
 			history_data[selected_columns] = history_data[selected_columns].astype(float)
 		
