@@ -43,7 +43,7 @@ class PlayerController:
 		# history_data['kickoff_time'] = pd.to_datetime(history_data['kickoff_time'])
 		# history_data = history_data[history_data['kickoff_time'] < current_time]
 
-		self.view.render_player_info(player_data, fixtures_data, history_data)
+		# self.view.render_player_info(player_data, fixtures_data, history_data)
 
 	def plot_side_by_side_bar(self, player_names, gw_range, stat): 
 
@@ -61,7 +61,7 @@ class PlayerController:
 			selected_history_data_range.loc[:, 'gameweek'] = selected_history_data_range['round'].apply(lambda x: f'GW {x}')
 			dfs.append(selected_history_data_range)
 
-		df = pd.concat(dfs, ignore_index=True).sort_values('gameweek')
+		df = pd.concat(dfs, ignore_index=True).sort_values('round') 
 		fig = px.histogram(df, x="gameweek", y=stat, color="name", barmode="group", text_auto=True) 
 
 		self.view.render_side_by_side_bar(fig)
@@ -90,7 +90,7 @@ class PlayerController:
 			selected_history_data_range.loc[:, 'gameweek'] = selected_history_data_range['round'].apply(lambda x: f'GW {x}')
 			dfs.append(selected_history_data_range) 
 
-		df = pd.concat(dfs, ignore_index=True).sort_values('gameweek')
+		df = pd.concat(dfs, ignore_index=True).sort_values('round')
 		fig = px.line(df, x="gameweek", y=stat, color="name", markers=True) 
 
 		self.view.render_side_by_side_line(fig)
