@@ -1,0 +1,77 @@
+{
+  "fixtures": [
+    {
+      "event": 30,
+      "is_home": true,
+      "difficulty": 2,
+      "team_h": 10,
+      "team_a": 14
+    },
+    {
+      "event": 31,
+      "is_home": false,
+      "difficulty": 4,
+      "team_h": 14,
+      "team_a": 10
+    }
+  ],
+  "history": [
+    {
+      "round": 1,
+      "opponent_team": 14,
+      "total_points": 12,
+      "minutes": 90,
+      "goals_scored": 1,
+      "assists": 1,
+      "clean_sheets": 0,
+      "goals_conceded": 1,
+      "own_goals": 0,
+      "penalties_saved": 0,
+      "penalties_missed": 0,
+      "saves": 0,
+      "bonus": 3,
+      "bps": 40,
+      "influence": "85.4",
+      "creativity": "45.2",
+      "threat": "92.0",
+      "ict_index": "22.3",
+      "expected_goals": "0.54",
+      "expected_assists": "0.23",
+      "expected_goal_involvements": "0.77",
+      "expected_goals_conceded": "1.20",
+      "transfers_balance": 50000,
+      "selected": 5000000,
+      "transfers_in": 100000,
+      "transfers_out": 50000
+    },
+    {
+      "round": 2,
+      "opponent_team": 14,
+      "total_points": 6,
+      "minutes": 90,
+      "goals_scored": 1,
+      "assists": 0,
+      "clean_sheets": 0,
+      "goals_conceded": 2,
+      "own_goals": 0,
+      "penalties_saved": 0,
+      "penalties_missed": 0,
+      "saves": 0,
+      "bonus": 0,
+      "bps": 22,
+      "influence": "42.0",
+      "creativity": "30.1",
+      "threat": "55.0",
+      "ict_index": "12.7",
+      "expected_goals": "0.32",
+      "expected_assists": "0.10",
+      "expected_goal_involvements": "0.42",
+      "expected_goals_conceded": "1.80",
+      "transfers_balance": -10000,
+      "selected": 4900000,
+      "transfers_in": 20000,
+      "transfers_out": 30000
+    }
+  ],
+  "history_past": []
+}

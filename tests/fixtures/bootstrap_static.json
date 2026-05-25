@@ -1,0 +1,36 @@
+{
+  "teams": [
+    {"id": 10, "short_name": "LIV", "name": "Liverpool"},
+    {"id": 14, "short_name": "MCI", "name": "Manchester City"}
+  ],
+  "elements": [
+    {
+      "id": 1,
+      "first_name": "Mohamed",
+      "second_name": "Salah",
+      "element_type": 3,
+      "team": 10,
+      "now_cost": 130,
+      "total_points": 200,
+      "selected_by_percent": "45.5",
+      "form": "8.5",
+      "web_name": "Salah",
+      "status": "a",
+      "news": ""
+    },
+    {
+      "id": 2,
+      "first_name": "Erling",
+      "second_name": "Haaland",
+      "element_type": 4,
+      "team": 14,
+      "now_cost": 150,
+      "total_points": 180,
+      "selected_by_percent": "60.2",
+      "form": "7.2",
+      "web_name": "Haaland",
+      "status": "a",
+      "news": ""
+    }
+  ]
+}

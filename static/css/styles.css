@@ -1,0 +1,87 @@
+/* ── Autocomplete dropdown ──────────────────────────────────────────────── */
+
+.fpl-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  z-index: 50;
+  max-height: 280px;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.fpl-dropdown::-webkit-scrollbar { width: 4px; }
+.fpl-dropdown::-webkit-scrollbar-track { background: transparent; }
+.fpl-dropdown::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+.fpl-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #e2e8f0;
+  gap: 8px;
+}
+
+.fpl-dropdown-item:first-child { border-radius: 8px 8px 0 0; }
+.fpl-dropdown-item:last-child  { border-radius: 0 0 8px 8px; }
+
+.fpl-dropdown-item:hover,
+.fpl-dropdown-item.active {
+  background: #334155;
+}
+
+.fpl-dropdown-item .meta {
+  color: #64748b;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* ── D3 chart axes and grid ─────────────────────────────────────────────── */
+
+.chart-axis text {
+  fill: #64748b;
+  font-size: 11px;
+  font-family: ui-monospace, monospace;
+}
+
+.chart-axis .domain { display: none; }
+.chart-axis line    { display: none; }
+
+.chart-grid line {
+  stroke: #1e293b;
+  stroke-dasharray: 3 3;
+}
+
+/* ── Tooltip ─────────────────────────────────────────────────────────────── */
+
+.fpl-tooltip {
+  position: fixed;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #f1f5f9;
+  pointer-events: none;
+  z-index: 200;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  display: none;
+  min-width: 120px;
+}
+
+/* ── FDR (Fixture Difficulty Rating) colours ─────────────────────────────── */
+/* Match the official FPL colour scheme */
+
+.fdr-1 { background: #257d5a; color: #ffffff; }
+.fdr-2 { background: #01c47a; color: #0a0a0a; }
+.fdr-3 { background: #2d3748; color: #94a3b8; }
+.fdr-4 { background: #e8155b; color: #ffffff; }
+.fdr-5 { background: #7d0139; color: #ffffff; }

@@ -1,0 +1,274 @@
+{
+  "elements": [
+    {
+      "id": 1,
+      "first_name": "David",
+      "second_name": "Raya",
+      "element_type": 1,
+      "team": 1,
+      "now_cost": 55,
+      "total_points": 118,
+      "selected_by_percent": "4.8",
+      "form": "6.5",
+      "code": 40001,
+      "status": "a",
+      "squad_number": null
+    },
+    {
+      "id": 2,
+      "first_name": "Mark",
+      "second_name": "Flekken",
+      "element_type": 1,
+      "team": 4,
+      "now_cost": 45,
+      "total_points": 89,
+      "selected_by_percent": "2.1",
+      "form": "4.0",
+      "code": 40002,
+      "status": "a",
+      "squad_number": null
+    },
+    {
+      "id": 3,
+      "first_name": "Trent",
+      "second_name": "Alexander-Arnold",
+      "element_type": 2,
+      "team": 12,
+      "now_cost": 85,
+      "total_points": 162,
+      "selected_by_percent": "21.3",
+      "form": "7.0",
+      "code": 40003,
+      "status": "a",
+      "squad_number": null
+    },
+    {
+      "id": 4,
+      "first_name": "Pedro",
+      "second_name": "Porro",
+      "element_type": 2,
+      "team": 18,
+      "now_cost": 58,
+      "total_points": 108,
+      "selected_by_percent": "12.4",
+      "form": "5.5",
+      "code": 40004,
+      "status": "a",
+      "squad_number": null
+    },
+    {
+      "id": 5,
+      "first_name": "Vitaliy",
+      "second_name": "Mykolenko",
+      "element_type": 2,
+      "team": 8,
+      "now_cost": 43,
+      "total_points": 72,
+      "selected_by_percent": "3.6",
+      "form": "3.5",
+      "code": 40005,
+      "status": "a",
+      "squad_number": null
+    },
+    {
+      "id": 6,
+      "first_name": "Mohamed",
+      "second_name": "Salah",
+      "element_type": 3,
+      "team": 12,
+      "now_cost": 130,
+      "total_points": 218,
+      "selected_by_percent": "48.7",
+      "form": "9.5",
+      "code": 40006,
+      "status": "a",
+      "squad_number": null
+    },
+    {
+      "id": 7,
+      "first_name": "Cole",
+      "second_name": "Palmer",
+      "element_type": 3,
+      "team": 6,
+      "now_cost": 112,
+      "total_points": 195,
+      "selected_by_percent": "39.2",
+      "form": "8.5",
+      "code": 40007,
+      "status": "a",
+      "squad_number": null
+    },
+    {
+      "id": 8,
+      "first_name": "Bryan",
+      "second_name": "Mbeumo",
+      "element_type": 3,
+      "team": 4,
+      "now_cost": 82,
+      "total_points": 162,
+      "selected_by_percent": "22.8",
+      "form": "7.5",
+      "code": 40008,
+      "status": "a",
+      "squad_number": null
+    },
+    {
+      "id": 9,
+      "first_name": "Bukayo",
+      "second_name": "Saka",
+      "element_type": 3,
+      "team": 1,
+      "now_cost": 98,
+      "total_points": 148,
+      "selected_by_percent": "31.5",
+      "form": "6.5",
+      "code": 40009,
+      "status": "a",
+      "squad_number": null
+    },
+    {
+      "id": 10,
+      "first_name": "Erling",
+      "second_name": "Haaland",
+      "element_type": 4,
+      "team": 13,
+      "now_cost": 148,
+      "total_points": 201,
+      "selected_by_percent": "45.6",
+      "form": "9.0",
+      "code": 40010,
+      "status": "a",
+      "squad_number": null
+    },
+    {
+      "id": 11,
+      "first_name": "Ollie",
+      "second_name": "Watkins",
+      "element_type": 4,
+      "team": 2,
+      "now_cost": 84,
+      "total_points": 132,
+      "selected_by_percent": "18.9",
+      "form": "6.0",
+      "code": 40011,
+      "status": "a",
+      "squad_number": null
+    },
+    {
+      "id": 12,
+      "first_name": "Alexander",
+      "second_name": "Isak",
+      "element_type": 4,
+      "team": 15,
+      "now_cost": 82,
+      "total_points": 128,
+      "selected_by_percent": "15.4",
+      "form": "6.0",
+      "code": 40012,
+      "status": "a",
+      "squad_number": null
+    }
+  ],
+  "teams": [
+    {
+      "id": 1,
+      "name": "Arsenal",
+      "short_name": "ARS"
+    },
+    {
+      "id": 2,
+      "name": "Aston Villa",
+      "short_name": "AVL"
+    },
+    {
+      "id": 3,
+      "name": "Bournemouth",
+      "short_name": "BOU"
+    },
+    {
+      "id": 4,
+      "name": "Brentford",
+      "short_name": "BRE"
+    },
+    {
+      "id": 5,
+      "name": "Brighton",
+      "short_name": "BHA"
+    },
+    {
+      "id": 6,
+      "name": "Chelsea",
+      "short_name": "CHE"
+    },
+    {
+      "id": 7,
+      "name": "Crystal Palace",
+      "short_name": "CRY"
+    },
+    {
+      "id": 8,
+      "name": "Everton",
+      "short_name": "EVE"
+    },
+    {
+      "id": 9,
+      "name": "Fulham",
+      "short_name": "FUL"
+    },
+    {
+      "id": 10,
+      "name": "Ipswich",
+      "short_name": "IPS"
+    },
+    {
+      "id": 11,
+      "name": "Leicester",
+      "short_name": "LEI"
+    },
+    {
+      "id": 12,
+      "name": "Liverpool",
+      "short_name": "LIV"
+    },
+    {
+      "id": 13,
+      "name": "Man City",
+      "short_name": "MCI"
+    },
+    {
+      "id": 14,
+      "name": "Man Utd",
+      "short_name": "MUN"
+    },
+    {
+      "id": 15,
+      "name": "Newcastle",
+      "short_name": "NEW"
+    },
+    {
+      "id": 16,
+      "name": "Nott'm Forest",
+      "short_name": "NFO"
+    },
+    {
+      "id": 17,
+      "name": "Southampton",
+      "short_name": "SOU"
+    },
+    {
+      "id": 18,
+      "name": "Spurs",
+      "short_name": "TOT"
+    },
+    {
+      "id": 19,
+      "name": "West Ham",
+      "short_name": "WHU"
+    },
+    {
+      "id": 20,
+      "name": "Wolves",
+      "short_name": "WOL"
+    }
+  ]
+}

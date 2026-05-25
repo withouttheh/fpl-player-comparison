@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FPL Analytics</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+  <header class="border-b border-slate-800 px-6 py-5">
+    <div class="max-w-7xl mx-auto flex items-baseline gap-3">
+      <h1 class="text-2xl font-bold tracking-tight text-white">FPL Analytics</h1>
+      <span class="text-slate-500 text-sm">2025/26</span>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+
+    <!-- Player selection -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div class="space-y-3">
+        <label class="text-xs font-semibold uppercase tracking-widest text-blue-400">Player 1</label>
+        <div class="relative" id="search1-container">
+          <input id="search1" type="text" placeholder="Search player…" autocomplete="off"
+            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-sm
+                   text-white placeholder-slate-500 focus:outline-none focus:ring-2
+                   focus:ring-blue-500 focus:border-transparent">
+          <div id="dropdown1" class="fpl-dropdown hidden"></div>
+        </div>
+        <div id="card1" class="hidden bg-slate-900 rounded-xl border border-blue-500/40 p-4"></div>
+      </div>
+
+      <div class="space-y-3">
+        <label class="text-xs font-semibold uppercase tracking-widest text-orange-400">Player 2</label>
+        <div class="relative" id="search2-container">
+          <input id="search2" type="text" placeholder="Search player…" autocomplete="off"
+            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-sm
+                   text-white placeholder-slate-500 focus:outline-none focus:ring-2
+                   focus:ring-orange-500 focus:border-transparent">
+          <div id="dropdown2" class="fpl-dropdown hidden"></div>
+        </div>
+        <div id="card2" class="hidden bg-slate-900 rounded-xl border border-orange-500/40 p-4"></div>
+      </div>
+
+    </section>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="py-24 text-center text-slate-600 text-sm select-none">
+      Select two players above to compare their stats
+    </div>
+
+    <!-- Charts (revealed once both players have data) -->
+    <div id="charts-section" class="hidden space-y-6">
+
+      <!-- Stat selector + GW range -->
+      <div class="flex flex-wrap items-center gap-4">
+        <span class="text-xs font-semibold uppercase tracking-widest text-slate-400">Stat</span>
+        <select id="stat-select"
+          class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white
+                 focus:outline-none focus:ring-2 focus:ring-slate-500 cursor-pointer">
+        </select>
+        <span class="text-xs font-semibold uppercase tracking-widest text-slate-400 ml-2">GW</span>
+        <input id="gw-from" type="number" min="1" max="38" value="1"
+          class="w-16 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white
+                 focus:outline-none focus:ring-2 focus:ring-slate-500 text-center">
+        <span class="text-slate-500 text-sm">to</span>
+        <input id="gw-to" type="number" min="1" max="38" value="38"
+          class="w-16 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white
+                 focus:outline-none focus:ring-2 focus:ring-slate-500 text-center">
+      </div>
+
+      <!-- Bar chart: per-gameweek -->
+      <div class="bg-slate-900 rounded-xl border border-slate-800 p-6">
+        <h2 class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-5">Per Gameweek</h2>
+        <div id="bar-chart" class="w-full"></div>
+      </div>
+
+      <!-- Line chart: cumulative -->
+      <div class="bg-slate-900 rounded-xl border border-slate-800 p-6">
+        <h2 class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-5">Cumulative</h2>
+        <div id="line-chart" class="w-full"></div>
+      </div>
+
+      <!-- Upcoming fixtures -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-slate-900 rounded-xl border border-slate-800 p-6">
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">
+            <span id="fixtures1-title"></span> — Next Fixtures
+          </h2>
+          <div id="fixtures1" class="space-y-2"></div>
+        </div>
+        <div class="bg-slate-900 rounded-xl border border-slate-800 p-6">
+          <h2 class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4">
+            <span id="fixtures2-title"></span> — Next Fixtures
+          </h2>
+          <div id="fixtures2" class="space-y-2"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div class="fpl-tooltip"></div>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
