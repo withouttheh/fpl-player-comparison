@@ -328,7 +328,7 @@ gives a 404 (it is a protocol-relative URL, not a double-slash path).
 │  FPL API             External dependency                  │
 │  fantasy.premierleague.com/api/                          │
 └──────────────────────┬──────────────────────────────────┘
-                       │ capture.py (end-of-season, one-shot)
+                       │ scripts/capture.py (end-of-season, one-shot)
 ┌──────────────────────▼──────────────────────────────────┐
 │  S3                  Long-term raw data archive           │
 │  s3://fpl-api-raw/fpl/2025-26/                          │
@@ -339,11 +339,11 @@ gives a 404 (it is a protocol-relative URL, not a double-slash path).
 
 ## S3 data pipeline
 
-At end of season, `capture.py` snapshots the entire FPL API to S3 before the API resets.
+At end of season, `scripts/capture.py` snapshots the entire FPL API to S3 before the API resets.
 This is a standalone script — it has no dependency on the server layer.
 
 ```
-capture.py
+scripts/capture.py
     │
     ├── GET /bootstrap-static/        → s3://fpl-api-raw/fpl/2025-26/bootstrap_static.json
     ├── GET /fixtures/                → s3://fpl-api-raw/fpl/2025-26/fixtures.json

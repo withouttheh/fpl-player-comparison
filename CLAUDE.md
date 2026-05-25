@@ -5,7 +5,7 @@ A pure-Python web application (zero frameworks) for comparing Fantasy Premier Le
 side by side. Data is fetched live from the official FPL API. Charts are rendered in the
 browser with D3.js. Styling uses Tailwind CSS via CDN. There is no database.
 
-An end-of-season capture script (`capture.py`) snapshots all FPL API data to S3 before
+An end-of-season capture script (`scripts/capture.py`) snapshots all FPL API data to S3 before
 the API resets — preserving gameweek-by-gameweek history that is otherwise lost.
 
 ## How to run
@@ -18,8 +18,8 @@ FPL_MOCK=1 python server.py    # local fixture data (no internet required)
 ## Data capture (run once per season)
 ```bash
 source venv/bin/activate
-python capture.py --season 2025-26          # full run (~10 min, 920 files)
-python capture.py --season 2025-26 --dry-run  # preview without uploading
+python scripts/capture.py --season 2025-26          # full run (~10 min, 920 files)
+python scripts/capture.py --season 2025-26 --dry-run  # preview without uploading
 ```
 
 Requires AWS credentials in `~/.aws/credentials` with write access to `s3://fpl-api-raw`.
@@ -46,7 +46,7 @@ FPL API (external, read-only)
 
 S3 data archive (write-once, end-of-season)
   s3://fpl-api-raw/fpl/{season}/
-  capture.py      ← standalone script, no dependency on the server layer
+  scripts/capture.py ← standalone script, no dependency on the server layer
 ```
 
 ## File index
@@ -56,7 +56,7 @@ S3 data archive (write-once, end-of-season)
 | `server.py` | Entry point. Creates `ThreadingHTTPServer`, registers the router, starts listening. |
 | `router.py` | Parses request path, validates method, dispatches to the correct handler. |
 | `cache.py` | Thread-safe in-memory TTL cache. Wraps FPL API calls so the API is not hit on every request. |
-| `capture.py` | End-of-season S3 capture script. Fetches bootstrap-static, fixtures, live GW data, dream teams, and all 841 element summaries. Re-run safe. |
+| `scripts/capture.py` | End-of-season S3 capture script. Fetches bootstrap-static, fixtures, live GW data, dream teams, and all 841 element summaries. Re-run safe. |
 | `pyproject.toml` | Ruff, pytest, and bandit config — single source of truth for tooling. |
 | `requirements.txt` | Pinned runtime deps for `pip install -r`. Dev deps via `pip install -e ".[dev]"`. |
 | `handlers/` | HTTP request handlers — one module per route group. All four handlers built and tested. |
