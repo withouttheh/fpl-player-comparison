@@ -66,7 +66,7 @@ class Router:
             try:
                 send_error(request, 500, "Internal server error")
             except Exception:
-                pass
+                pass  # nosec B110 — last resort; connection may already be dead
 
     def _dispatch(self, request) -> None:
         raw_path: str = request.path

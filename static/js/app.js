@@ -49,6 +49,20 @@ const state = {
   gwTo: 38,
 };
 
+// ── Security helpers ───────────────────────────────────────────────────────
+
+const _escapeEl = document.createElement("span");
+function escapeHTML(str) {
+  _escapeEl.textContent = String(str);
+  return _escapeEl.innerHTML;
+}
+
+// Clamp FDR difficulty to 1–5 so it can safely be used as a CSS class suffix.
+function safeFdr(difficulty) {
+  const n = parseInt(difficulty, 10);
+  return (n >= 1 && n <= 5) ? n : 3;
+}
+
 // ── API ────────────────────────────────────────────────────────────────────
 
 async function apiFetch(path) {
@@ -73,8 +87,8 @@ function buildSearch(num) {
       const el = document.createElement("div");
       el.className = "fpl-dropdown-item";
       el.innerHTML = `
-        <span>${p.full_name}</span>
-        <span class="meta">${p.team} &middot; ${p.position} &middot; &pound;${p.now_cost}m</span>
+        <span>${escapeHTML(p.full_name)}</span>
+        <span class="meta">${escapeHTML(p.team)} &middot; ${escapeHTML(p.position)} &middot; &pound;${p.now_cost}m</span>
       `;
       el.addEventListener("mousedown", (e) => {
         e.preventDefault();   // keep input focused through the click
@@ -147,12 +161,12 @@ function renderCard(player, num) {
   card.innerHTML = `
     <div class="flex items-start justify-between">
       <div>
-        <div class="text-base font-bold text-white">${player.full_name}</div>
-        <div class="text-xs text-slate-400 mt-1">${player.team} &middot; ${player.position}</div>
+        <div class="text-base font-bold text-white">${escapeHTML(player.full_name)}</div>
+        <div class="text-xs text-slate-400 mt-1">${escapeHTML(player.team)} &middot; ${escapeHTML(player.position)}</div>
       </div>
       <div class="text-right">
         <div class="text-lg font-bold text-white">&pound;${player.now_cost}m</div>
-        <div class="text-xs text-slate-400 mt-1">${player.selected_by_percent}% owned</div>
+        <div class="text-xs text-slate-400 mt-1">${escapeHTML(player.selected_by_percent)}% owned</div>
       </div>
     </div>
     <div class="grid grid-cols-2 gap-2 mt-4">
@@ -161,7 +175,7 @@ function renderCard(player, num) {
         <div class="text-xs text-slate-500">pts</div>
       </div>
       <div class="bg-slate-800 rounded-lg p-2 text-center">
-        <div class="text-sm font-bold text-white">${player.form}</div>
+        <div class="text-sm font-bold text-white">${escapeHTML(player.form)}</div>
         <div class="text-xs text-slate-500">form</div>
       </div>
     </div>
@@ -370,14 +384,15 @@ function renderFixtures(fixtures, containerId, playerName, titleId) {
   }
 
   el.innerHTML = fixtures.slice(0, 8).map(f => {
-    const opponent = f.is_home ? f.team_a : f.team_h;
+    const opponent = escapeHTML(f.is_home ? f.team_a : f.team_h);
     const venue    = f.is_home ? "H" : "A";
+    const fdr      = safeFdr(f.difficulty);
     return `
       <div class="flex items-center gap-3">
-        <span class="text-xs text-slate-500 w-10 shrink-0">GW&nbsp;${f.event}</span>
-        <span class="fdr-${f.difficulty} rounded px-2 py-1 text-xs font-bold w-10 text-center shrink-0">${opponent}</span>
+        <span class="text-xs text-slate-500 w-10 shrink-0">GW&nbsp;${parseInt(f.event, 10)}</span>
+        <span class="fdr-${fdr} rounded px-2 py-1 text-xs font-bold w-10 text-center shrink-0">${opponent}</span>
         <span class="text-xs font-semibold ${f.is_home ? "text-slate-300" : "text-slate-500"}">${venue}</span>
-        <div class="flex-1 h-1.5 rounded-full fdr-${f.difficulty} opacity-30"></div>
+        <div class="flex-1 h-1.5 rounded-full fdr-${fdr} opacity-30"></div>
       </div>
     `;
   }).join("");
