@@ -14,23 +14,24 @@ tests/
   helpers.py                    ✓ MockRequest, MockHTTPResponse, make_url_router
   handlers/
     test_static_handler.py      ✓ path traversal, MIME types, 404 on directory (23 tests)
-    test_players_handler.py     ✓ JSON shape, cache hit/miss, FPL API failure → 502 (22 tests)
-    test_history_handler.py     ✓ player ID validation, valid range, FPL failure → 502 (26 tests)
-    test_fixtures_handler.py    ✓ same as history (19 tests)
+    test_seasons_handler.py     ✓ response shape, archive labels, no API call (11 tests)
+    test_players_handler.py     ✓ JSON shape, cache, FPL failure → 502, archive path (29 tests)
+    test_history_handler.py     ✓ player ID validation, cache, archive path (34 tests)
+    test_fixtures_handler.py    ✓ same as history, archive returns empty list (24 tests)
   utils/
     loaders/
-      test_base_loader.py       ← planned: timeout enforcement, error on non-200
-      test_bootstrap_loader.py  ← planned: missing keys raise ValueError
-      test_elements_loader.py   ← planned: missing keys, empty response
+      test_base_loader.py       ✓ timeout enforcement, error on non-200
+      test_bootstrap_loader.py  ✓ missing keys raise ValueError
+      test_elements_summary_loader.py  ✓ missing keys, empty response
+      test_s3_loader.py         ✓ mock mode, boto3 mode, correct S3 keys (15 tests)
     preprocessors/
-      test_base_preprocessor.py      ← planned: team mapping, full_name, position mapping
-      test_elements_preprocessor.py  ← planned
-      test_history_preprocessor.py   ← planned
+      test_base_preprocessor.py      ✓ team mapping, full_name, position mapping
+      test_elements_preprocessor.py  ✓ fields, team resolution, history, fixtures
   test_router.py                ✓ path parsing, method rejection, unknown paths → 404 (44 tests)
   test_cache.py                 ✓ TTL expiry, thread safety, cache miss calls through (17 tests)
 ```
 
-Total: **137 tests** (as of last run). All passing.
+Total: **241 tests** (as of last run). All passing.
 
 ## Priority order
 

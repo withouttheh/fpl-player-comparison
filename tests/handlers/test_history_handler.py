@@ -17,6 +17,7 @@ Player ID rules tested:
 """
 
 import json
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -27,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from cache import cache
 from handlers.history_handler import _CACHE_TTL, _MAX_PLAYER_ID, _OUTPUT_FIELDS, serve_history
 from tests.helpers import MockHTTPResponse, MockRequest, make_url_router
+from utils.config import ARCHIVE_SEASONS
 
 _FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 _BOOTSTRAP = json.loads((_FIXTURES_DIR / "bootstrap_static.json").read_text())
@@ -299,6 +301,76 @@ class TestHistoryHandlerErrors(unittest.TestCase):
             for call in mock_get.call_args_list:
                 _, kwargs = call
                 self.assertEqual(kwargs.get("timeout"), 10)
+
+
+class TestHistoryHandlerArchive(unittest.TestCase):
+    """Archive season path: reads from S3 mock, separate cache key, no player ID block."""
+
+    def setUp(self):
+        cache.clear()
+        self._env = patch.dict(os.environ, {"FPL_MOCK": "1"})
+        self._env.start()
+
+    def tearDown(self):
+        cache.clear()
+        self._env.stop()
+
+    def _call(self, player_id: str = "1", season: str | None = None) -> MockRequest:
+        season = season or ARCHIVE_SEASONS[0]
+        request = MockRequest(f"/api/player/{player_id}/history?season={season}")
+        serve_history(request, player_id=player_id)
+        return request
+
+    def test_valid_archive_season_returns_200(self):
+        self.assertEqual(self._call().last_status, 200)
+
+    def test_archive_response_is_a_list(self):
+        self.assertIsInstance(self._call().response_json(), list)
+
+    def test_archive_response_has_history_fields(self):
+        history = self._call().response_json()
+        for gw in history:
+            self.assertIn("round", gw)
+
+    def test_archive_ict_fields_are_floats(self):
+        history = self._call().response_json()
+        for gw in history:
+            for field in ("influence", "creativity", "threat", "ict_index"):
+                if field in gw:
+                    self.assertIsInstance(gw[field], float, f"'{field}' must be float in archive")
+
+    def test_invalid_season_falls_back_to_live_api(self):
+        """Unknown ?season= must fall back to the live FPL API, not S3.
+
+        Temporarily removes FPL_MOCK so the live path uses requests.get.
+        """
+        self._env.stop()
+        try:
+            request = MockRequest("/api/player/1/history?season=1999-00")
+            with patch("utils.loaders.base_loader.requests.get") as mock_get:
+                mock_get.side_effect = _make_mock()
+                serve_history(request, player_id="1")
+                self.assertTrue(mock_get.called)
+        finally:
+            self._env.start()
+
+    def test_archive_cache_key_namespaced_with_season_and_player(self):
+        season = ARCHIVE_SEASONS[0]
+        self._call(player_id="1", season=season)
+        expected_key = f"history:{season}:1"
+        self.assertIsNotNone(cache.get(expected_key), f"Expected cache key '{expected_key}'")
+
+    def test_archive_cache_does_not_pollute_live_cache(self):
+        """Archive fetch must not write to live 'history:1' cache key."""
+        self._call(player_id="1")
+        self.assertIsNone(cache.get("history:1"))
+
+    def test_player_id_still_validated_for_archive(self):
+        """Player ID range validation applies even when a season param is present."""
+        season = ARCHIVE_SEASONS[0]
+        request = MockRequest(f"/api/player/0/history?season={season}")
+        serve_history(request, player_id="0")
+        self.assertEqual(request.last_status, 400)
 
 
 if __name__ == "__main__":

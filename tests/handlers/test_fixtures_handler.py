@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from cache import cache
 from handlers.fixtures_handler import _CACHE_TTL, _MAX_PLAYER_ID, serve_fixtures
 from tests.helpers import MockHTTPResponse, MockRequest, make_url_router
+from utils.config import ARCHIVE_SEASONS
 
 _FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 _BOOTSTRAP = json.loads((_FIXTURES_DIR / "bootstrap_static.json").read_text())
@@ -252,6 +253,56 @@ class TestFixturesHandlerErrors(unittest.TestCase):
             for call in mock_get.call_args_list:
                 _, kwargs = call
                 self.assertEqual(kwargs.get("timeout"), 10)
+
+
+class TestFixturesHandlerArchive(unittest.TestCase):
+    """Archive seasons always return an empty fixtures list, with no API call."""
+
+    def setUp(self):
+        cache.clear()
+
+    def tearDown(self):
+        cache.clear()
+
+    def test_archive_season_returns_200(self):
+        season = ARCHIVE_SEASONS[0]
+        request = MockRequest(f"/api/player/1/fixtures?season={season}")
+        serve_fixtures(request, player_id="1")
+        self.assertEqual(request.last_status, 200)
+
+    def test_archive_season_returns_empty_list(self):
+        season = ARCHIVE_SEASONS[0]
+        request = MockRequest(f"/api/player/1/fixtures?season={season}")
+        serve_fixtures(request, player_id="1")
+        self.assertEqual(request.response_json(), [])
+
+    def test_archive_season_makes_no_api_call(self):
+        """Completed seasons have no upcoming fixtures — no outbound request needed."""
+        season = ARCHIVE_SEASONS[0]
+        request = MockRequest(f"/api/player/1/fixtures?season={season}")
+        with patch("utils.loaders.base_loader.requests.get") as mock_get:
+            serve_fixtures(request, player_id="1")
+            mock_get.assert_not_called()
+
+    def test_archive_season_returns_early_before_player_id_validation(self):
+        """For archive seasons, an invalid player ID still gets a 200 empty list.
+
+        The archive path returns before player ID validation — there is no data
+        to fetch regardless of ID, so rejecting the request would be misleading.
+        """
+        season = ARCHIVE_SEASONS[0]
+        request = MockRequest(f"/api/player/0/fixtures?season={season}")
+        serve_fixtures(request, player_id="0")
+        self.assertEqual(request.last_status, 200)
+        self.assertEqual(request.response_json(), [])
+
+    def test_invalid_season_does_not_short_circuit(self):
+        """An unrecognised ?season= value must go through the normal live path."""
+        request = MockRequest("/api/player/1/fixtures?season=1999-00")
+        with patch("utils.loaders.base_loader.requests.get") as mock_get:
+            mock_get.side_effect = _make_mock()
+            serve_fixtures(request, player_id="1")
+            self.assertTrue(mock_get.called)
 
 
 if __name__ == "__main__":

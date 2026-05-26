@@ -22,6 +22,7 @@ Why not mock the loader classes directly?
 """
 
 import json
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -33,6 +34,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from cache import cache
 from handlers.players_handler import _CACHE_KEY, _CACHE_TTL, _OUTPUT_FIELDS, serve_players
 from tests.helpers import MockHTTPResponse, MockRequest
+from utils.config import ARCHIVE_SEASONS
 
 # Load fixture data once for the whole module.
 _FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
@@ -264,6 +266,82 @@ class TestPlayersHandlerErrors(unittest.TestCase):
                     10,
                     "requests.get called without timeout=10 — thread starvation risk",
                 )
+
+
+class TestPlayersHandlerArchive(unittest.TestCase):
+    """Archive season path: reads from S3 mock, uses separate cache key."""
+
+    def setUp(self):
+        cache.clear()
+        self._env = patch.dict(os.environ, {"FPL_MOCK": "1"})
+        self._env.start()
+
+    def tearDown(self):
+        cache.clear()
+        self._env.stop()
+
+    def _call(self, season: str) -> MockRequest:
+        request = MockRequest(f"/api/players?season={season}")
+        serve_players(request)
+        return request
+
+    def test_valid_archive_season_returns_200(self):
+        season = ARCHIVE_SEASONS[0]
+        self.assertEqual(self._call(season).last_status, 200)
+
+    def test_archive_response_is_a_list(self):
+        season = ARCHIVE_SEASONS[0]
+        self.assertIsInstance(self._call(season).response_json(), list)
+
+    def test_archive_response_has_correct_fields(self):
+        season = ARCHIVE_SEASONS[0]
+        players = self._call(season).response_json()
+        for player in players:
+            for field in _OUTPUT_FIELDS:
+                self.assertIn(field, player, f"Missing field '{field}' in archive player")
+
+    def test_invalid_season_falls_back_to_live_api(self):
+        """An unknown ?season= value must fall back to the live FPL API, not S3.
+
+        This test temporarily removes FPL_MOCK so the live path uses requests.get.
+        """
+        self._env.stop()
+        try:
+            request = MockRequest("/api/players?season=1999-00")
+            with patch("utils.loaders.base_loader.requests.get") as mock_get:
+                mock_get.return_value = MockHTTPResponse(_BOOTSTRAP)
+                serve_players(request)
+                self.assertTrue(
+                    mock_get.called, "Expected live FPL API to be called for unknown season"
+                )
+        finally:
+            self._env.start()
+
+    def test_archive_cache_key_is_namespaced_with_season(self):
+        """Archive cache key must include the season so it doesn't collide with live data."""
+        season = ARCHIVE_SEASONS[0]
+        self._call(season)
+        archive_key = f"players:{season}"
+        self.assertIsNotNone(
+            cache.get(archive_key), f"Expected cache key '{archive_key}' to be set"
+        )
+
+    def test_archive_cache_does_not_pollute_live_cache(self):
+        """Fetching archive data must not overwrite the live 'players' cache key."""
+        season = ARCHIVE_SEASONS[0]
+        self._call(season)
+        self.assertIsNone(
+            cache.get(_CACHE_KEY), "Archive fetch must not write to live 'players' cache key"
+        )
+
+    def test_archive_now_cost_divided_by_10(self):
+        """now_cost from S3 is in FPL internal format (×10) — handler divides server-side."""
+        season = ARCHIVE_SEASONS[0]
+        players = self._call(season).response_json()
+        for player in players:
+            self.assertLess(
+                player["now_cost"], 30, "now_cost must be in £m, not FPL internal (×10) format"
+            )
 
 
 if __name__ == "__main__":

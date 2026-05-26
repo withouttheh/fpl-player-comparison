@@ -106,7 +106,7 @@ pytest tests/e2e/ -v                     # e2e browser tests (requires server)
 pytest tests/ -v                         # everything
 ```
 
-221 tests: 191 unit (cache, router, handlers, loaders, preprocessors) + 30 Playwright e2e (search dropdown, player selection, D3 chart rendering, fixture FDR display).
+241 unit tests (cache, router, handlers, loaders, preprocessors — including S3 loader and archive handler paths) + 30 Playwright e2e (search dropdown, player selection, D3 chart rendering, fixture FDR display).
 
 ## End-of-season data capture
 
