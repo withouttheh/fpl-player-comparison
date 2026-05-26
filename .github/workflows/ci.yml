@@ -94,3 +94,22 @@ jobs:
 
       - name: Run bandit
         run: bandit -c pyproject.toml -r . --exclude ./venv,./tests
+
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: [test, lint, security]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd /opt/fpl-analytics
+            git pull origin main
+            venv/bin/pip install -q -r requirements.txt
+            sudo systemctl restart fpl-analytics
