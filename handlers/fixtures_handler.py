@@ -18,10 +18,11 @@ Fields returned:
 """
 
 import sys
+from urllib.parse import parse_qs, urlparse
 
 from cache import cache
 from handlers.base_handler import send_error, send_json
-from utils.config import base_url
+from utils.config import ARCHIVE_SEASONS, base_url
 from utils.loaders.bootstrap_static_loader import TeamsLoader
 from utils.loaders.elements_summary_loader import FixturesLoader
 from utils.preprocessors.elements_summary_preprocessors import FixturesPreprocessor
@@ -31,7 +32,17 @@ _MAX_PLAYER_ID = 2000
 
 
 def serve_fixtures(request, player_id: str, **kwargs) -> None:
-    """Handle GET /api/player/<player_id>/fixtures."""
+    """Handle GET /api/player/<player_id>/fixtures.
+
+    Returns an empty list for archive seasons — completed seasons have no
+    upcoming fixtures, so there is nothing to show.
+    """
+    qs = parse_qs(urlparse(request.path).query)
+    season = qs.get("season", [None])[0]
+    if season in ARCHIVE_SEASONS:
+        send_json(request, [])
+        return
+
     try:
         pid = int(player_id)
     except ValueError:

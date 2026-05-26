@@ -59,11 +59,11 @@ S3 data archive (write-once, end-of-season)
 | `scripts/capture.py` | End-of-season S3 capture script. Fetches bootstrap-static, fixtures, live GW data, dream teams, and all 841 element summaries. Re-run safe. |
 | `pyproject.toml` | Ruff, pytest, and bandit config — single source of truth for tooling. |
 | `requirements.txt` | Pinned runtime deps for `pip install -r`. Dev deps via `pip install -e ".[dev]"`. |
-| `handlers/` | HTTP request handlers — one module per route group. All four handlers built and tested. |
-| `static/` | `index.html`, `css/styles.css`, `js/app.js` — player comparison UI with D3.js charts. |
+| `handlers/` | HTTP request handlers — one module per route group. All five handlers built and tested. |
+| `static/` | `index.html`, `css/styles.css`, `js/app.js` — player comparison UI with D3.js charts, season selector, shareable URLs. |
 | `utils/` | FPL data layer. No HTTP knowledge. Loaders + preprocessors. |
 | `data/` | Minimal mock fixtures used when `FPL_MOCK=1`. Committed to repo. |
-| `tests/` | 221 tests: 191 unit + 30 Playwright e2e. |
+| `tests/` | Unit + Playwright e2e tests. |
 
 ## Security model (overview)
 
@@ -85,13 +85,15 @@ All errors return a plain status code and a generic message.
 ## Key invariants
 
 - Router stores `(module, "func_name")` tuples resolved via `getattr` at dispatch — enables test patching without dependency injection
-- Cache keys: `players`, `history:{id}`, `fixtures:{id}`
-- Cache TTLs: 3600s (players, fixtures), 300s (history)
+- Cache keys: `players`, `history:{id}`, `fixtures:{id}` (live); `players:{season}`, `history:{season}:{id}` (archive)
+- Cache TTLs: 3600s (players, fixtures), 300s (history), 86400s (all archive data — never changes)
 - Player ID range: 1–2000, validated at handler level
 - `requests.get(..., timeout=10)` on every outbound call
+- `?season=` param accepted only for values in `ARCHIVE_SEASONS`; any other value silently falls back to live data
 - Security headers on every response (X-Content-Type-Options, X-Frame-Options, CSP, Referrer-Policy)
 - Path traversal blocked with `Path.resolve()` + `is_relative_to()` — never `startswith()`
 - Error messages never forwarded to client
+- Shareable URLs: `?p1=ID&p2=ID&season=YYYY-YY&stat=key` — all optional, parsed on load in `app.js`
 
 ## Python version
 3.10+ (uses `match` statements and `Path.is_relative_to`).

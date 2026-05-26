@@ -25,6 +25,7 @@ from urllib.parse import urlparse
 import handlers.fixtures_handler as _fixtures
 import handlers.history_handler as _history
 import handlers.players_handler as _players
+import handlers.seasons_handler as _seasons
 import handlers.static_handler as _static
 from handlers.base_handler import send_error
 
@@ -41,6 +42,7 @@ class Route(NamedTuple):
 
 
 ROUTES: list[Route] = [
+    Route(re.compile(r"^/api/seasons$"), GET, _seasons, "serve_seasons"),
     Route(re.compile(r"^/api/players$"), GET, _players, "serve_players"),
     Route(re.compile(r"^/api/player/(?P<player_id>\d+)/history$"), GET, _history, "serve_history"),
     Route(

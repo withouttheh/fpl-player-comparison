@@ -41,12 +41,14 @@ const STAT_GROUPS = [
 
 const state = {
   players: [],
+  seasons: [],
+  season:  "current",
   p1: null, p2: null,
   h1: [],   h2: [],
   f1: [],   f2: [],
-  stat: "total_points",
+  stat:   "total_points",
   gwFrom: 1,
-  gwTo: 38,
+  gwTo:   38,
 };
 
 // ── Security helpers ───────────────────────────────────────────────────────
@@ -71,14 +73,120 @@ async function apiFetch(path) {
   return res.json();
 }
 
+function playersUrl() {
+  return state.season === "current"
+    ? "/api/players"
+    : `/api/players?season=${encodeURIComponent(state.season)}`;
+}
+
+function historyUrl(playerId) {
+  return state.season === "current"
+    ? `/api/player/${playerId}/history`
+    : `/api/player/${playerId}/history?season=${encodeURIComponent(state.season)}`;
+}
+
+function fixturesUrl(playerId) {
+  return state.season === "current"
+    ? `/api/player/${playerId}/fixtures`
+    : `/api/player/${playerId}/fixtures?season=${encodeURIComponent(state.season)}`;
+}
+
+// ── URL management ─────────────────────────────────────────────────────────
+
+function updateURL() {
+  const params = new URLSearchParams();
+  if (state.season !== "current")       params.set("season", state.season);
+  if (state.p1)                          params.set("p1", state.p1.id);
+  if (state.p2)                          params.set("p2", state.p2.id);
+  if (state.stat !== "total_points")    params.set("stat", state.stat);
+  const qs = params.toString();
+  history.replaceState(null, "", qs ? `?${qs}` : "/");
+}
+
+// ── Share button ───────────────────────────────────────────────────────────
+
+function initShareButton() {
+  document.getElementById("share-btn").addEventListener("click", () => {
+    const url = window.location.href;
+    const label = document.getElementById("share-btn-label");
+
+    const reset = () => { label.textContent = "Copy link"; };
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        label.textContent = "Copied!";
+        setTimeout(reset, 2000);
+      }).catch(() => fallbackCopy(url, label, reset));
+    } else {
+      fallbackCopy(url, label, reset);
+    }
+  });
+}
+
+function fallbackCopy(url, label, reset) {
+  const ta = document.createElement("textarea");
+  ta.value = url;
+  ta.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand("copy");
+    label.textContent = "Copied!";
+  } catch {
+    label.textContent = "Copy failed";
+  }
+  document.body.removeChild(ta);
+  setTimeout(reset, 2000);
+}
+
+// ── Season selector ────────────────────────────────────────────────────────
+
+async function loadSeasons() {
+  try {
+    state.seasons = await apiFetch("/api/seasons");
+  } catch {
+    state.seasons = [{ id: "current", label: "Live" }];
+  }
+  const select = document.getElementById("season-select");
+  state.seasons.forEach(s => {
+    const opt = document.createElement("option");
+    opt.value       = s.id;
+    opt.textContent = s.label;
+    if (s.id === state.season) opt.selected = true;
+    select.appendChild(opt);
+  });
+  select.addEventListener("change", () => changeSeason(select.value));
+}
+
+async function changeSeason(newSeason) {
+  if (newSeason === state.season) return;
+  state.season = newSeason;
+
+  // Clear existing player selections
+  state.p1 = null; state.p2 = null;
+  state.h1 = []; state.h2 = [];
+  state.f1 = []; state.f2 = [];
+  document.getElementById("search1").value = "";
+  document.getElementById("search2").value = "";
+  renderCard(null, 1);
+  renderCard(null, 2);
+  maybeShowCharts();
+  updateURL();
+
+  try {
+    state.players = await apiFetch(playersUrl());
+  } catch (err) {
+    console.error("Failed to load players for season:", err);
+    state.players = [];
+  }
+}
+
 // ── Search / Autocomplete ──────────────────────────────────────────────────
 
 function buildSearch(num) {
-  const inputId    = `search${num}`;
-  const dropdownId = `dropdown${num}`;
-  const input    = document.getElementById(inputId);
-  const dropdown = document.getElementById(dropdownId);
-  let activeIdx = -1;
+  const input    = document.getElementById(`search${num}`);
+  const dropdown = document.getElementById(`dropdown${num}`);
+  let activeIdx  = -1;
 
   function showDropdown(items) {
     dropdown.innerHTML = "";
@@ -91,7 +199,7 @@ function buildSearch(num) {
         <span class="meta">${escapeHTML(p.team)} &middot; ${escapeHTML(p.position)} &middot; &pound;${p.now_cost}m</span>
       `;
       el.addEventListener("mousedown", (e) => {
-        e.preventDefault();   // keep input focused through the click
+        e.preventDefault();
         confirmSelection(p);
       });
       dropdown.appendChild(el);
@@ -109,6 +217,7 @@ function buildSearch(num) {
     if (num === 1) { state.p1 = null; state.h1 = []; state.f1 = []; }
     else           { state.p2 = null; state.h2 = []; state.f2 = []; }
     renderCard(null, num);
+    updateURL();
     maybeShowCharts();
   }
 
@@ -147,7 +256,6 @@ function buildSearch(num) {
   });
 
   input.addEventListener("blur", () => {
-    // Small delay so mousedown on an item fires before the blur hides the dropdown.
     setTimeout(() => dropdown.classList.add("hidden"), 150);
   });
 }
@@ -194,7 +302,6 @@ function renderBarChart(h1, h2, p1, p2, stat) {
   const width  = W - margin.left - margin.right;
   const height = H - margin.top  - margin.bottom;
 
-  // Build per-round lookup and merged round list.
   const rounds = [...new Set([...h1.map(d => d.round), ...h2.map(d => d.round)])].sort((a, b) => a - b);
   const idx1 = Object.fromEntries(h1.map(d => [d.round, d[stat] ?? 0]));
   const idx2 = Object.fromEntries(h2.map(d => [d.round, d[stat] ?? 0]));
@@ -209,13 +316,11 @@ function renderBarChart(h1, h2, p1, p2, stat) {
 
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Scales
   const xOuter = d3.scaleBand().domain(rounds).range([0, width]).paddingInner(0.25);
   const xInner = d3.scaleBand().domain(["p1", "p2"]).range([0, xOuter.bandwidth()]).padding(0.06);
   const maxVal  = Math.max(d3.max(data, d => Math.max(d.p1, d.p2)) ?? 0, 1);
   const y = d3.scaleLinear().domain([0, maxVal]).range([height, 0]).nice();
 
-  // Horizontal grid lines
   g.append("g").attr("class", "chart-grid")
     .selectAll("line")
     .data(y.ticks(5))
@@ -223,7 +328,6 @@ function renderBarChart(h1, h2, p1, p2, stat) {
     .attr("x1", 0).attr("x2", width)
     .attr("y1", d => y(d)).attr("y2", d => y(d));
 
-  // Bars — player 1
   g.selectAll(".bar-p1").data(data).join("rect")
     .attr("class", "bar-p1")
     .attr("x",      d => xOuter(d.round) + xInner("p1"))
@@ -233,7 +337,6 @@ function renderBarChart(h1, h2, p1, p2, stat) {
     .attr("fill",   COLOURS.p1)
     .attr("rx", 2);
 
-  // Bars — player 2
   g.selectAll(".bar-p2").data(data).join("rect")
     .attr("class", "bar-p2")
     .attr("x",      d => xOuter(d.round) + xInner("p2"))
@@ -243,7 +346,6 @@ function renderBarChart(h1, h2, p1, p2, stat) {
     .attr("fill",   COLOURS.p2)
     .attr("rx", 2);
 
-  // X axis — thin out labels when many gameweeks
   const step = rounds.length > 20 ? 5 : rounds.length > 10 ? 2 : 1;
   g.append("g").attr("class", "chart-axis")
     .attr("transform", `translate(0,${height})`)
@@ -254,11 +356,9 @@ function renderBarChart(h1, h2, p1, p2, stat) {
         .tickPadding(6)
     );
 
-  // Y axis
   g.append("g").attr("class", "chart-axis")
     .call(d3.axisLeft(y).ticks(5).tickSize(4).tickPadding(6));
 
-  // Legend — stacked vertically to avoid name overlap
   const legend = svg.append("g")
     .attr("transform", `translate(${margin.left},${H - 28})`);
 
@@ -274,7 +374,6 @@ function renderBarChart(h1, h2, p1, p2, stat) {
       .text(p.full_name.length > 30 ? p.full_name.slice(0, 30) + "…" : p.full_name);
   });
 
-  // Tooltip
   const tooltip = d3.select(".fpl-tooltip");
   svg.on("mousemove", function (event) {
     const [mx] = d3.pointer(event, g.node());
@@ -332,7 +431,6 @@ function renderLineChart(h1, h2, p1, p2, stat) {
 
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Grid
   g.append("g").attr("class", "chart-grid")
     .selectAll("line")
     .data(y.ticks(5))
@@ -340,7 +438,6 @@ function renderLineChart(h1, h2, p1, p2, stat) {
     .attr("x1", 0).attr("x2", width)
     .attr("y1", d => y(d)).attr("y2", d => y(d));
 
-  // Lines + end-cap dots
   [[c1, COLOURS.p1, p1], [c2, COLOURS.p2, p2]].forEach(([data, colour]) => {
     if (!data.length) return;
 
@@ -357,7 +454,6 @@ function renderLineChart(h1, h2, p1, p2, stat) {
       .attr("r", 4).attr("fill", colour);
   });
 
-  // Axes
   const step = rounds.length > 20 ? 5 : rounds.length > 10 ? 2 : 1;
   g.append("g").attr("class", "chart-axis")
     .attr("transform", `translate(0,${height})`)
@@ -418,7 +514,10 @@ function initStatSelector() {
 
   select.addEventListener("change", () => {
     state.stat = select.value;
-    if (state.h1.length && state.h2.length) refreshCharts();
+    if (state.h1.length && state.h2.length) {
+      refreshCharts();
+      updateURL();
+    }
   });
 }
 
@@ -463,18 +562,20 @@ async function selectPlayer(num, player) {
   renderCard(player, num);
 
   const [history, fixtures] = await Promise.all([
-    apiFetch(`/api/player/${player.id}/history`).catch(err => {
+    apiFetch(historyUrl(player.id)).catch(err => {
       console.error(`History fetch failed for player ${player.id}:`, err);
       return [];
     }),
-    apiFetch(`/api/player/${player.id}/fixtures`).catch(err => {
+    apiFetch(fixturesUrl(player.id)).catch(err => {
       console.error(`Fixtures fetch failed for player ${player.id}:`, err);
       return [];
     }),
   ]);
+
   if (num === 1) { state.h1 = history; state.f1 = fixtures; }
   else           { state.h2 = history; state.f2 = fixtures; }
 
+  updateURL();
   maybeShowCharts();
 }
 
@@ -492,6 +593,8 @@ function maybeShowCharts() {
   const ready = state.p1 && state.p2 && state.h1.length && state.h2.length;
   document.getElementById("empty-state").classList.toggle("hidden", ready);
   document.getElementById("charts-section").classList.toggle("hidden", !ready);
+  document.getElementById("share-btn").classList.toggle("hidden", !ready);
+  document.getElementById("share-btn").classList.toggle("flex", ready);
   if (ready) {
     setGwRangeFromData();
     refreshCharts();
@@ -503,9 +606,29 @@ function maybeShowCharts() {
 async function init() {
   initStatSelector();
   initGwRange();
+  initShareButton();
 
+  // Load available seasons and build the selector.
+  await loadSeasons();
+
+  // Restore state from URL params before fetching players.
+  const params = new URLSearchParams(window.location.search);
+
+  const urlSeason = params.get("season");
+  if (urlSeason && state.seasons.find(s => s.id === urlSeason)) {
+    state.season = urlSeason;
+    document.getElementById("season-select").value = urlSeason;
+  }
+
+  const urlStat = params.get("stat");
+  if (urlStat && Object.keys(STAT_LABELS).includes(urlStat)) {
+    state.stat = urlStat;
+    document.getElementById("stat-select").value = urlStat;
+  }
+
+  // Fetch the player roster for the selected season.
   try {
-    state.players = await apiFetch("/api/players");
+    state.players = await apiFetch(playersUrl());
   } catch (err) {
     console.error("Failed to load players:", err);
     const el = document.getElementById("empty-state");
@@ -516,6 +639,27 @@ async function init() {
 
   buildSearch(1);
   buildSearch(2);
+
+  // Auto-select players from URL (e.g. from a shared link).
+  const p1id = params.get("p1");
+  const p2id = params.get("p2");
+  const autoSelects = [];
+
+  if (p1id) {
+    const p = state.players.find(p => String(p.id) === p1id);
+    if (p) {
+      document.getElementById("search1").value = p.full_name;
+      autoSelects.push(selectPlayer(1, p));
+    }
+  }
+  if (p2id) {
+    const p = state.players.find(p => String(p.id) === p2id);
+    if (p) {
+      document.getElementById("search2").value = p.full_name;
+      autoSelects.push(selectPlayer(2, p));
+    }
+  }
+  await Promise.all(autoSelects);
 }
 
 document.addEventListener("DOMContentLoaded", init);

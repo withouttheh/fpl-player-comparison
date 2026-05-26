@@ -1,5 +1,13 @@
-# Define the base URL
+import os
+
 base_url = "https://fantasy.premierleague.com/api"
+
+# S3 archive — bucket that holds end-of-season snapshots
+S3_BUCKET = os.getenv("S3_BUCKET", "fpl-api-raw")
+
+# Seasons available in S3. Add a new entry each time capture.py is run.
+# Format: "YYYY-YY" matching the S3 key prefix fpl/{season}/
+ARCHIVE_SEASONS = ["2025-26"]
 
 elem_cols = [
     "chance_of_playing_next_round",

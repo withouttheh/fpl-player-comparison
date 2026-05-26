@@ -15,8 +15,10 @@ Built with no web framework. The HTTP server, router, TTL cache, and security la
 - **24 stats** — goals, assists, clean sheets, xG, xA, ICT index, bonus, minutes, and more
 - **GW range filter** — zoom into any gameweek window, charts update instantly
 - **Fixture difficulty** — upcoming fixtures colour-coded by FDR (1–5) for both players
+- **Season archive** — switch between the live season and past seasons stored in S3; the FPL API wipes per-gameweek history at the start of each new season, but the archive preserves it
+- **Shareable URLs** — selecting players encodes them in the URL (`?p1=ID&p2=ID&season=…`) so comparisons can be shared or bookmarked
 - **Offline mode** — `FPL_MOCK=1` runs against local fixture data, no internet required
-- **End-of-season archive** — `scripts/capture.py` snapshots the full FPL API to S3 before history is lost
+- **End-of-season capture** — `scripts/capture.py` snapshots the full FPL API to S3 before history is lost
 
 ## Quick start
 
@@ -59,13 +61,17 @@ Browser ──HTTP──► server.py (ThreadedHTTPServer)
 
 | Method | Path | Description |
 |--------|------|-------------|
+| GET | `/api/seasons` | Available seasons (live + S3 archive) |
 | GET | `/api/players` | Full player roster with team, position, cost |
+| GET | `/api/players?season=2025-26` | Roster from S3 archive for a past season |
 | GET | `/api/player/{id}/history` | Gameweek-by-gameweek stats for one player |
+| GET | `/api/player/{id}/history?season=2025-26` | Archived gameweek stats from S3 |
 | GET | `/api/player/{id}/fixtures` | Upcoming fixtures with FDR for one player |
 | GET | `/static/**` | Static assets (HTML, CSS, JS) |
 | GET | `/` | Serves `static/index.html` |
 
 Player IDs are validated server-side: must be 1–2000. Outside that range → 400.
+The `season` parameter is only accepted for seasons listed in `ARCHIVE_SEASONS` in `utils/config.py`.
 
 ## Caching
 
@@ -149,16 +155,18 @@ scripts/
   capture.py                 # End-of-season S3 data capture (standalone)
 handlers/
   base_handler.py            # Shared send_json / send_error / security headers
-  players_handler.py         # GET /api/players
-  history_handler.py         # GET /api/player/{id}/history
-  fixtures_handler.py        # GET /api/player/{id}/fixtures
+  seasons_handler.py         # GET /api/seasons
+  players_handler.py         # GET /api/players[?season=]
+  history_handler.py         # GET /api/player/{id}/history[?season=]
+  fixtures_handler.py        # GET /api/player/{id}/fixtures[?season=]
   static_handler.py          # GET /static/** and GET /
 utils/
-  config.py                  # FPL API base URL, column list, colour constants
+  config.py                  # FPL API base URL, S3_BUCKET, ARCHIVE_SEASONS, constants
   loaders/
     base_loader.py                  # requests.get wrapper with timeout + raise_for_status
-    bootstrap_static_loader.py      # ElementsLoader + TeamsLoader
+    bootstrap_static_loader.py      # ElementsLoader + TeamsLoader (live FPL API)
     elements_summary_loader.py      # FixturesLoader + HistoryLoader + HistoryPastLoader
+    s3_loader.py                    # S3BootstrapLoader + S3ElementSummaryLoader (archive)
   preprocessors/
     base_preprocessor.py            # Team ID → short name, full_name, position mapping
     bootstrap_static_preprocessors.py
