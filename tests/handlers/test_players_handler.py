@@ -25,14 +25,14 @@ import json
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 # Add project root to path so imports work when running from any directory.
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from cache import cache
-from handlers.players_handler import serve_players, _CACHE_KEY, _CACHE_TTL, _OUTPUT_FIELDS
-from tests.helpers import MockRequest, MockHTTPResponse
+from handlers.players_handler import _CACHE_KEY, _CACHE_TTL, _OUTPUT_FIELDS, serve_players
+from tests.helpers import MockHTTPResponse, MockRequest
 
 # Load fixture data once for the whole module.
 _FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
@@ -162,8 +162,9 @@ class TestPlayersHandlerResponse(unittest.TestCase):
         players = request.response_json()
         for player in players:
             self.assertIsInstance(
-                player["now_cost"], float,
-                f"now_cost should be float, got {type(player['now_cost'])}"
+                player["now_cost"],
+                float,
+                f"now_cost should be float, got {type(player['now_cost'])}",
             )
 
     def test_full_name_is_concatenation_of_first_and_last(self):
@@ -209,9 +210,12 @@ class TestPlayersHandlerErrors(unittest.TestCase):
     def test_network_failure_returns_502(self):
         """A requests.ConnectionError must produce 502, not 500 or a crash."""
         import requests as req
+
         request = MockRequest("/api/players")
-        with patch("utils.loaders.base_loader.requests.get",
-                   side_effect=req.exceptions.ConnectionError("FPL API unreachable")):
+        with patch(
+            "utils.loaders.base_loader.requests.get",
+            side_effect=req.exceptions.ConnectionError("FPL API unreachable"),
+        ):
             serve_players(request)
         self.assertEqual(request.last_status, 502)
 
@@ -235,9 +239,12 @@ class TestPlayersHandlerErrors(unittest.TestCase):
     def test_error_response_body_is_generic(self):
         """Error body must not contain exception details or stack traces."""
         import requests as req
+
         request = MockRequest("/api/players")
-        with patch("utils.loaders.base_loader.requests.get",
-                   side_effect=req.exceptions.ConnectionError("secret internal detail")):
+        with patch(
+            "utils.loaders.base_loader.requests.get",
+            side_effect=req.exceptions.ConnectionError("secret internal detail"),
+        ):
             serve_players(request)
         body = request.response_body().decode()
         self.assertNotIn("secret internal detail", body)
@@ -253,8 +260,9 @@ class TestPlayersHandlerErrors(unittest.TestCase):
             for call in mock_get.call_args_list:
                 _, kwargs = call
                 self.assertEqual(
-                    kwargs.get("timeout"), 10,
-                    "requests.get called without timeout=10 — thread starvation risk"
+                    kwargs.get("timeout"),
+                    10,
+                    "requests.get called without timeout=10 — thread starvation risk",
                 )
 
 

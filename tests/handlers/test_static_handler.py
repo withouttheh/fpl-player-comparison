@@ -24,18 +24,17 @@ Why we create real temporary files:
 """
 
 import io
-import os
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from handlers.static_handler import serve_static, STATIC_ROOT
-
+from handlers.static_handler import serve_static
 
 # ---------------------------------------------------------------------------
 # MockRequest
 # ---------------------------------------------------------------------------
+
 
 class MockRequest:
     """Stand-in for BaseHTTPRequestHandler used in all handler tests."""
@@ -68,6 +67,7 @@ class MockRequest:
 # Helper: temporary static root
 # ---------------------------------------------------------------------------
 
+
 class StaticHandlerTestCase(unittest.TestCase):
     """Base class that creates a temporary directory as the static root.
 
@@ -85,18 +85,14 @@ class StaticHandlerTestCase(unittest.TestCase):
         (self.static_root / "index.html").write_text(
             "<html><body>FPL</body></html>", encoding="utf-8"
         )
-        (self.static_root / "style.css").write_text(
-            "body { margin: 0; }", encoding="utf-8"
-        )
+        (self.static_root / "style.css").write_text("body { margin: 0; }", encoding="utf-8")
 
         js_dir = self.static_root / "js"
         js_dir.mkdir()
         (js_dir / "app.js").write_text("console.log('FPL');", encoding="utf-8")
 
         # Patch STATIC_ROOT and INDEX_FILE in the handler module.
-        self._root_patch = patch(
-            "handlers.static_handler.STATIC_ROOT", self.static_root.resolve()
-        )
+        self._root_patch = patch("handlers.static_handler.STATIC_ROOT", self.static_root.resolve())
         self._index_patch = patch(
             "handlers.static_handler.INDEX_FILE",
             (self.static_root / "index.html").resolve(),
@@ -113,6 +109,7 @@ class StaticHandlerTestCase(unittest.TestCase):
 # ---------------------------------------------------------------------------
 # 1. Path traversal attacks
 # ---------------------------------------------------------------------------
+
 
 class TestPathTraversal(StaticHandlerTestCase):
     """The handler must never serve a file outside the static root.
@@ -185,6 +182,7 @@ class TestPathTraversal(StaticHandlerTestCase):
 # 2. Happy path: normal file serving
 # ---------------------------------------------------------------------------
 
+
 class TestNormalFileServing(StaticHandlerTestCase):
     """Files within the static root are served correctly."""
 
@@ -221,6 +219,7 @@ class TestNormalFileServing(StaticHandlerTestCase):
 # ---------------------------------------------------------------------------
 # 3. MIME type enforcement
 # ---------------------------------------------------------------------------
+
 
 class TestMimeTypes(StaticHandlerTestCase):
     """Content-Type must always be set from the file extension, never guessed."""
@@ -260,9 +259,7 @@ class TestMimeTypes(StaticHandlerTestCase):
         # X-Content-Type-Options: nosniff must be set on every response.
         request = MockRequest("/static/style.css")
         serve_static(request)
-        self.assertEqual(
-            request._headers.get("x-content-type-options"), "nosniff"
-        )
+        self.assertEqual(request._headers.get("x-content-type-options"), "nosniff")
 
     def test_security_headers_present_on_all_responses(self):
         request = MockRequest("/static/style.css")
@@ -275,6 +272,7 @@ class TestMimeTypes(StaticHandlerTestCase):
 # ---------------------------------------------------------------------------
 # 4. Query strings and path edge cases
 # ---------------------------------------------------------------------------
+
 
 class TestPathEdgeCases(StaticHandlerTestCase):
     """Edge cases in how paths are interpreted."""

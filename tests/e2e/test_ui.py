@@ -21,11 +21,10 @@ The FPL_MOCK env var is set by conftest.py for the server subprocess.
 The --headed flag is useful when a test is failing and you want to see why.
 """
 
-import pytest
 from playwright.sync_api import Page, expect
 
-
 # ── Helpers ──────────────────────────────────────────────────────────────────
+
 
 def search_and_select(page: Page, input_id: str, dropdown_id: str, query: str):
     """Type a query, wait for the dropdown, and click the first result."""
@@ -36,8 +35,8 @@ def search_and_select(page: Page, input_id: str, dropdown_id: str, query: str):
 
 # ── Page load ─────────────────────────────────────────────────────────────────
 
-class TestPageLoad:
 
+class TestPageLoad:
     def test_page_title(self, page: Page, live_server_url: str):
         page.goto(live_server_url)
         expect(page).to_have_title("FPL Analytics")
@@ -70,8 +69,8 @@ class TestPageLoad:
 
 # ── Search dropdown ───────────────────────────────────────────────────────────
 
-class TestSearchDropdown:
 
+class TestSearchDropdown:
     def test_typing_two_chars_shows_dropdown(self, page: Page, live_server_url: str):
         page.goto(live_server_url)
         page.locator("#search1").fill("Sa")
@@ -133,14 +132,14 @@ class TestSearchDropdown:
 
 # ── Player selection ──────────────────────────────────────────────────────────
 
-class TestPlayerSelection:
 
+class TestPlayerSelection:
     def test_clicking_dropdown_item_fills_input(self, page: Page, live_server_url: str):
         page.goto(live_server_url)
         search_and_select(page, "search1", "dropdown1", "Sa")
         # Input should now contain the selected player's full name
         value = page.locator("#search1").input_value()
-        assert len(value) > 3   # not empty
+        assert len(value) > 3  # not empty
 
     def test_clicking_dropdown_item_hides_dropdown(self, page: Page, live_server_url: str):
         page.goto(live_server_url)
@@ -169,14 +168,14 @@ class TestPlayerSelection:
         """Charts only appear when BOTH players are selected."""
         page.goto(live_server_url)
         search_and_select(page, "search1", "dropdown1", "Sa")
-        page.wait_for_timeout(500)   # allow any async fetch to complete
+        page.wait_for_timeout(500)  # allow any async fetch to complete
         expect(page.locator("#charts-section")).to_be_hidden()
 
 
 # ── Two-player comparison ─────────────────────────────────────────────────────
 
-class TestComparison:
 
+class TestComparison:
     def _select_two_players(self, page: Page, live_server_url: str):
         page.goto(live_server_url)
         search_and_select(page, "search1", "dropdown1", "Sa")

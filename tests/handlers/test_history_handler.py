@@ -25,10 +25,8 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from cache import cache
-from handlers.history_handler import (
-    serve_history, _CACHE_TTL, _MAX_PLAYER_ID, _OUTPUT_FIELDS
-)
-from tests.helpers import MockRequest, MockHTTPResponse, make_url_router
+from handlers.history_handler import _CACHE_TTL, _MAX_PLAYER_ID, _OUTPUT_FIELDS, serve_history
+from tests.helpers import MockHTTPResponse, MockRequest, make_url_router
 
 _FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 _BOOTSTRAP = json.loads((_FIXTURES_DIR / "bootstrap_static.json").read_text())
@@ -37,10 +35,12 @@ _ELEMENT_SUMMARY = json.loads((_FIXTURES_DIR / "element_summary.json").read_text
 
 def _make_mock():
     """Return a side_effect that routes bootstrap vs element-summary calls."""
-    return make_url_router({
-        "bootstrap-static": MockHTTPResponse(_BOOTSTRAP),
-        "element-summary":  MockHTTPResponse(_ELEMENT_SUMMARY),
-    })
+    return make_url_router(
+        {
+            "bootstrap-static": MockHTTPResponse(_BOOTSTRAP),
+            "element-summary": MockHTTPResponse(_ELEMENT_SUMMARY),
+        }
+    )
 
 
 class TestHistoryHandlerValidation(unittest.TestCase):
@@ -181,23 +181,25 @@ class TestHistoryHandlerResponse(unittest.TestCase):
         for gw in history:
             if "influence" in gw:
                 self.assertIsInstance(
-                    gw["influence"], float,
-                    f"influence should be float, got {type(gw['influence'])}"
+                    gw["influence"],
+                    float,
+                    f"influence should be float, got {type(gw['influence'])}",
                 )
 
     def test_xg_fields_are_floats(self):
         """All xG/xA/xGI/xGC fields must be float, not string."""
         float_fields = [
-            "expected_goals", "expected_assists",
-            "expected_goal_involvements", "expected_goals_conceded",
+            "expected_goals",
+            "expected_assists",
+            "expected_goal_involvements",
+            "expected_goals_conceded",
         ]
         history = self._call().response_json()
         for gw in history:
             for field in float_fields:
                 if field in gw:
                     self.assertIsInstance(
-                        gw[field], float,
-                        f"'{field}' should be float, got {type(gw[field])}"
+                        gw[field], float, f"'{field}' should be float, got {type(gw[field])}"
                     )
 
     def test_ict_index_is_float(self):
@@ -239,9 +241,12 @@ class TestHistoryHandlerErrors(unittest.TestCase):
 
     def test_network_failure_returns_502(self):
         import requests as req
+
         request = MockRequest("/api/player/1/history")
-        with patch("utils.loaders.base_loader.requests.get",
-                   side_effect=req.exceptions.ConnectionError("unreachable")):
+        with patch(
+            "utils.loaders.base_loader.requests.get",
+            side_effect=req.exceptions.ConnectionError("unreachable"),
+        ):
             serve_history(request, player_id="1")
         self.assertEqual(request.last_status, 502)
 
@@ -250,10 +255,12 @@ class TestHistoryHandlerErrors(unittest.TestCase):
         bad_summary = {"fixtures": [], "history_past": []}  # 'history' missing
         request = MockRequest("/api/player/1/history")
         with patch("utils.loaders.base_loader.requests.get") as mock_get:
-            mock_get.side_effect = make_url_router({
-                "bootstrap-static": MockHTTPResponse(_BOOTSTRAP),
-                "element-summary":  MockHTTPResponse(bad_summary),
-            })
+            mock_get.side_effect = make_url_router(
+                {
+                    "bootstrap-static": MockHTTPResponse(_BOOTSTRAP),
+                    "element-summary": MockHTTPResponse(bad_summary),
+                }
+            )
             serve_history(request, player_id="1")
         self.assertEqual(request.last_status, 502)
 
@@ -262,18 +269,23 @@ class TestHistoryHandlerErrors(unittest.TestCase):
         empty_summary = dict(_ELEMENT_SUMMARY, history=[])
         request = MockRequest("/api/player/1/history")
         with patch("utils.loaders.base_loader.requests.get") as mock_get:
-            mock_get.side_effect = make_url_router({
-                "bootstrap-static": MockHTTPResponse(_BOOTSTRAP),
-                "element-summary":  MockHTTPResponse(empty_summary),
-            })
+            mock_get.side_effect = make_url_router(
+                {
+                    "bootstrap-static": MockHTTPResponse(_BOOTSTRAP),
+                    "element-summary": MockHTTPResponse(empty_summary),
+                }
+            )
             serve_history(request, player_id="1")
         self.assertEqual(request.last_status, 502)
 
     def test_error_body_does_not_leak_internals(self):
         import requests as req
+
         request = MockRequest("/api/player/1/history")
-        with patch("utils.loaders.base_loader.requests.get",
-                   side_effect=req.exceptions.ConnectionError("db_password=secret")):
+        with patch(
+            "utils.loaders.base_loader.requests.get",
+            side_effect=req.exceptions.ConnectionError("db_password=secret"),
+        ):
             serve_history(request, player_id="1")
         body = request.response_body().decode()
         self.assertNotIn("db_password", body)

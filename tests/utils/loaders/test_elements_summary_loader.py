@@ -20,7 +20,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from tests.helpers import MockHTTPResponse
 from utils.loaders.elements_summary_loader import (
-    ElementsSummaryLoader, FixturesLoader, HistoryLoader, HistoryPastLoader,
+    ElementsSummaryLoader,
+    FixturesLoader,
+    HistoryLoader,
+    HistoryPastLoader,
 )
 
 _FIXTURES_DIR = Path(__file__).parent.parent.parent / "fixtures"
@@ -32,15 +35,15 @@ def _mock_summary():
 
 
 class TestElementsSummaryLoader(unittest.TestCase):
-
     def test_data_populated_on_success(self):
         with patch("utils.loaders.base_loader.requests.get", return_value=_mock_summary()):
             loader = ElementsSummaryLoader("https://example.com/api", element_id=1)
         self.assertIsNotNone(loader.data)
 
     def test_endpoint_includes_element_id(self):
-        with patch("utils.loaders.base_loader.requests.get",
-                   return_value=_mock_summary()) as mock_get:
+        with patch(
+            "utils.loaders.base_loader.requests.get", return_value=_mock_summary()
+        ) as mock_get:
             ElementsSummaryLoader("https://example.com/api", element_id=42)
         called_url = mock_get.call_args[0][0]
         self.assertIn("42", called_url)
@@ -48,14 +51,16 @@ class TestElementsSummaryLoader(unittest.TestCase):
 
     def test_data_is_none_on_network_failure(self):
         import requests as req
-        with patch("utils.loaders.base_loader.requests.get",
-                   side_effect=req.exceptions.ConnectionError("down")):
+
+        with patch(
+            "utils.loaders.base_loader.requests.get",
+            side_effect=req.exceptions.ConnectionError("down"),
+        ):
             loader = ElementsSummaryLoader("https://example.com/api", element_id=1)
         self.assertIsNone(loader.data)
 
 
 class TestFixturesLoader(unittest.TestCase):
-
     def _loader(self, data=None):
         resp = MockHTTPResponse(data or _ELEMENT_SUMMARY)
         with patch("utils.loaders.base_loader.requests.get", return_value=resp):
@@ -63,6 +68,7 @@ class TestFixturesLoader(unittest.TestCase):
 
     def test_get_fixtures_data_returns_dataframe(self):
         import pandas as pd
+
         df = self._loader().get_fixtures_data()
         self.assertIsInstance(df, pd.DataFrame)
 
@@ -81,7 +87,6 @@ class TestFixturesLoader(unittest.TestCase):
 
 
 class TestHistoryLoader(unittest.TestCase):
-
     def _loader(self, data=None):
         resp = MockHTTPResponse(data or _ELEMENT_SUMMARY)
         with patch("utils.loaders.base_loader.requests.get", return_value=resp):
@@ -89,6 +94,7 @@ class TestHistoryLoader(unittest.TestCase):
 
     def test_get_history_data_returns_dataframe(self):
         import pandas as pd
+
         df = self._loader().get_history_data()
         self.assertIsInstance(df, pd.DataFrame)
 
@@ -112,10 +118,11 @@ class TestHistoryLoader(unittest.TestCase):
 
 
 class TestHistoryPastLoader(unittest.TestCase):
-
     def test_get_history_past_returns_empty_dataframe_for_empty_list(self):
-        with patch("utils.loaders.base_loader.requests.get",
-                   return_value=MockHTTPResponse(_ELEMENT_SUMMARY)):
+        with patch(
+            "utils.loaders.base_loader.requests.get",
+            return_value=MockHTTPResponse(_ELEMENT_SUMMARY),
+        ):
             loader = HistoryPastLoader("https://example.com/api", element_id=1)
         df = loader.get_history_past_data()
         self.assertEqual(len(df), 0)

@@ -16,11 +16,11 @@ Why no real sleeps?
 """
 
 import threading
-import time
 import unittest
 from unittest.mock import patch
 
-from cache import TTLCache, cache as module_cache
+from cache import TTLCache
+from cache import cache as module_cache
 
 
 class TestTTLCacheBasic(unittest.TestCase):
@@ -71,6 +71,7 @@ class TestTTLCacheBasic(unittest.TestCase):
     def test_cached_value_can_be_any_type(self):
         """The cache must store arbitrary Python objects, not just strings."""
         import pandas as pd
+
         df = pd.DataFrame({"a": [1, 2, 3]})
         self.cache.set("df", df, ttl=60)
         result = self.cache.get("df")
@@ -108,7 +109,7 @@ class TestTTLCacheExpiry(unittest.TestCase):
         with patch("cache.time.monotonic", self._fake_monotonic):
             self.cache.set("key", "value", ttl=10)
             self._fake_time += 11
-            self.cache.get("key")        # triggers eviction
+            self.cache.get("key")  # triggers eviction
             self.assertEqual(len(self.cache), 0)
 
     def test_exact_expiry_boundary_is_expired(self):
@@ -130,7 +131,7 @@ class TestTTLCacheExpiry(unittest.TestCase):
 
             self._fake_time += 6
             self.assertIsNone(self.cache.get("short"))  # expired
-            self.assertEqual(self.cache.get("long"), "b")   # still valid
+            self.assertEqual(self.cache.get("long"), "b")  # still valid
 
 
 class TestTTLCacheThreadSafety(unittest.TestCase):
@@ -179,10 +180,9 @@ class TestTTLCacheThreadSafety(unittest.TestCase):
             except Exception as exc:
                 errors.append(exc)
 
-        threads = (
-            [threading.Thread(target=reader) for _ in range(5)]
-            + [threading.Thread(target=writer) for _ in range(5)]
-        )
+        threads = [threading.Thread(target=reader) for _ in range(5)] + [
+            threading.Thread(target=writer) for _ in range(5)
+        ]
         for t in threads:
             t.start()
         for t in threads:
@@ -200,7 +200,9 @@ class TestTTLCacheModuleSingleton(unittest.TestCase):
     def test_module_cache_is_same_object_on_reimport(self):
         """Python caches module imports — reimporting returns the same object."""
         import importlib
+
         import cache as cache_module
+
         cache_module_reimported = importlib.import_module("cache")
         self.assertIs(cache_module.cache, cache_module_reimported.cache)
 

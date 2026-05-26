@@ -32,8 +32,8 @@ Usage:
 
 import argparse
 import json
-import time
 import sys
+import time
 
 import boto3
 import requests
@@ -43,15 +43,16 @@ from botocore.exceptions import BotoCoreError, ClientError
 # Config
 # ---------------------------------------------------------------------------
 
-FPL_BASE      = "https://fantasy.premierleague.com/api"
-BUCKET        = "fpl-api-raw"
-REQUEST_DELAY = 0.5   # seconds between FPL API calls — be polite
-TIMEOUT       = 10    # seconds per request
+FPL_BASE = "https://fantasy.premierleague.com/api"
+BUCKET = "fpl-api-raw"
+REQUEST_DELAY = 0.5  # seconds between FPL API calls — be polite
+TIMEOUT = 10  # seconds per request
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def fpl_get(path: str) -> dict | list | None:
     url = f"{FPL_BASE}/{path}"
@@ -120,9 +121,10 @@ def detect_season(events: list[dict]) -> str:
 # Main
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Capture FPL season data to S3")
-    parser.add_argument("--season",  default=None, help="Season label, e.g. 2025-26")
+    parser.add_argument("--season", default=None, help="Season label, e.g. 2025-26")
     parser.add_argument("--dry-run", action="store_true", help="Print actions, upload nothing")
     args = parser.parse_args()
 
@@ -163,9 +165,7 @@ def main() -> None:
     time.sleep(REQUEST_DELAY)
 
     # ── Step 3: per-GW live data (final bonus + points) ───────────────────────
-    finished_gws = sorted(
-        [e["id"] for e in bootstrap.get("events", []) if e.get("finished")]
-    )
+    finished_gws = sorted([e["id"] for e in bootstrap.get("events", []) if e.get("finished")])
     print(f"\nFetching live data for {len(finished_gws)} finished GWs…")
     for gw in finished_gws:
         key = f"fpl/{season}/live/{gw}.json"
@@ -199,7 +199,7 @@ def main() -> None:
     print(f"\n{'─' * 40}")
     print(f"uploaded={totals['ok']}  skipped={totals['skipped']}  failed={totals['failed']}")
     if totals["failed"]:
-        print(f"Re-run to retry failed files — already-uploaded files will be skipped.")
+        print("Re-run to retry failed files — already-uploaded files will be skipped.")
         sys.exit(1)
     else:
         print("All done.")

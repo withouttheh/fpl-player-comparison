@@ -22,23 +22,36 @@ from utils.preprocessors.base_preprocessor import BasePreprocessor
 
 
 def _make_teams():
-    return pd.DataFrame([
-        {"id": 10, "short_name": "LIV"},
-        {"id": 14, "short_name": "MCI"},
-    ])
+    return pd.DataFrame(
+        [
+            {"id": 10, "short_name": "LIV"},
+            {"id": 14, "short_name": "MCI"},
+        ]
+    )
 
 
 def _make_players():
-    return pd.DataFrame([
-        {"id": 1, "first_name": "Mohamed", "second_name": "Salah",
-         "element_type": 3, "team": 10},
-        {"id": 2, "first_name": "Erling",  "second_name": "Haaland",
-         "element_type": 4, "team": 14},
-    ])
+    return pd.DataFrame(
+        [
+            {
+                "id": 1,
+                "first_name": "Mohamed",
+                "second_name": "Salah",
+                "element_type": 3,
+                "team": 10,
+            },
+            {
+                "id": 2,
+                "first_name": "Erling",
+                "second_name": "Haaland",
+                "element_type": 4,
+                "team": 14,
+            },
+        ]
+    )
 
 
 class TestTeamMapping(unittest.TestCase):
-
     def test_build_team_mapping_returns_correct_dict(self):
         teams = _make_teams()
         bp = BasePreprocessor(data=pd.DataFrame(), teams_data=teams)
@@ -49,8 +62,8 @@ class TestTeamMapping(unittest.TestCase):
         self.assertEqual(bp.team_mapping, {})
 
     def test_replace_team_ids_resolves_to_short_names(self):
-        df   = _make_players()
-        bp   = BasePreprocessor(data=df, teams_data=_make_teams())
+        df = _make_players()
+        bp = BasePreprocessor(data=df, teams_data=_make_teams())
         result = bp.replace_team_ids_with_names(["team"])
         self.assertListEqual(result["team"].tolist(), ["LIV", "MCI"])
 
@@ -62,10 +75,12 @@ class TestTeamMapping(unittest.TestCase):
         self.assertListEqual(result["team"].tolist(), [10, 14])
 
     def test_replace_team_ids_handles_multiple_columns(self):
-        df = pd.DataFrame([
-            {"team_h": 10, "team_a": 14},
-            {"team_h": 14, "team_a": 10},
-        ])
+        df = pd.DataFrame(
+            [
+                {"team_h": 10, "team_a": 14},
+                {"team_h": 14, "team_a": 10},
+            ]
+        )
         bp = BasePreprocessor(data=df, teams_data=_make_teams())
         result = bp.replace_team_ids_with_names(["team_h", "team_a"])
         self.assertListEqual(result["team_h"].tolist(), ["LIV", "MCI"])
@@ -73,7 +88,6 @@ class TestTeamMapping(unittest.TestCase):
 
 
 class TestPositionMapping(unittest.TestCase):
-
     def test_gk_maps_from_element_type_1(self):
         df = pd.DataFrame([{"element_type": 1}])
         bp = BasePreprocessor(data=df, teams_data=None)
@@ -99,37 +113,40 @@ class TestPositionMapping(unittest.TestCase):
         self.assertEqual(bp.data["position"].iloc[0], "FWD")
 
     def test_all_four_positions_in_one_dataframe(self):
-        df = pd.DataFrame([
-            {"element_type": 1}, {"element_type": 2},
-            {"element_type": 3}, {"element_type": 4},
-        ])
+        df = pd.DataFrame(
+            [
+                {"element_type": 1},
+                {"element_type": 2},
+                {"element_type": 3},
+                {"element_type": 4},
+            ]
+        )
         bp = BasePreprocessor(data=df, teams_data=None)
         bp.map_element_type_to_position()
-        self.assertListEqual(
-            bp.data["position"].tolist(), ["GK", "DEF", "MID", "FWD"]
-        )
+        self.assertListEqual(bp.data["position"].tolist(), ["GK", "DEF", "MID", "FWD"])
 
 
 class TestFullName(unittest.TestCase):
-
     def test_create_full_name_concatenates_first_and_last(self):
-        df = pd.DataFrame([
-            {"first_name": "Mohamed", "second_name": "Salah"},
-        ])
+        df = pd.DataFrame(
+            [
+                {"first_name": "Mohamed", "second_name": "Salah"},
+            ]
+        )
         bp = BasePreprocessor(data=df, teams_data=None)
         bp.create_full_name()
         self.assertEqual(bp.data["full_name"].iloc[0], "Mohamed Salah")
 
     def test_full_name_for_multiple_players(self):
-        df = pd.DataFrame([
-            {"first_name": "Mohamed", "second_name": "Salah"},
-            {"first_name": "Erling",  "second_name": "Haaland"},
-        ])
+        df = pd.DataFrame(
+            [
+                {"first_name": "Mohamed", "second_name": "Salah"},
+                {"first_name": "Erling", "second_name": "Haaland"},
+            ]
+        )
         bp = BasePreprocessor(data=df, teams_data=None)
         bp.create_full_name()
-        self.assertListEqual(
-            bp.data["full_name"].tolist(), ["Mohamed Salah", "Erling Haaland"]
-        )
+        self.assertListEqual(bp.data["full_name"].tolist(), ["Mohamed Salah", "Erling Haaland"])
 
 
 if __name__ == "__main__":

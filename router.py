@@ -22,14 +22,13 @@ import sys
 from typing import NamedTuple
 from urllib.parse import urlparse
 
-import handlers.players_handler  as _players
-import handlers.history_handler  as _history
 import handlers.fixtures_handler as _fixtures
-import handlers.static_handler   as _static
+import handlers.history_handler as _history
+import handlers.players_handler as _players
+import handlers.static_handler as _static
 from handlers.base_handler import send_error
 
-
-_MAX_PATH_LENGTH = 512   # anything longer is a scanner probe, not a real request
+_MAX_PATH_LENGTH = 512  # anything longer is a scanner probe, not a real request
 
 GET = frozenset({"GET"})
 
@@ -37,16 +36,18 @@ GET = frozenset({"GET"})
 class Route(NamedTuple):
     pattern: re.Pattern
     methods: frozenset
-    module:  object
-    func:    str
+    module: object
+    func: str
 
 
 ROUTES: list[Route] = [
-    Route(re.compile(r"^/api/players$"),                            GET, _players,  "serve_players"),
-    Route(re.compile(r"^/api/player/(?P<player_id>\d+)/history$"),  GET, _history,  "serve_history"),
-    Route(re.compile(r"^/api/player/(?P<player_id>\d+)/fixtures$"), GET, _fixtures, "serve_fixtures"),
-    Route(re.compile(r"^/static/"),                                  GET, _static,   "serve_static"),
-    Route(re.compile(r"^/$"),                                        GET, _static,   "serve_static"),
+    Route(re.compile(r"^/api/players$"), GET, _players, "serve_players"),
+    Route(re.compile(r"^/api/player/(?P<player_id>\d+)/history$"), GET, _history, "serve_history"),
+    Route(
+        re.compile(r"^/api/player/(?P<player_id>\d+)/fixtures$"), GET, _fixtures, "serve_fixtures"
+    ),
+    Route(re.compile(r"^/static/"), GET, _static, "serve_static"),
+    Route(re.compile(r"^/$"), GET, _static, "serve_static"),
 ]
 
 
@@ -70,7 +71,7 @@ class Router:
 
     def _dispatch(self, request) -> None:
         raw_path: str = request.path
-        method:   str = request.command.upper()
+        method: str = request.command.upper()
 
         if len(raw_path) > _MAX_PATH_LENGTH:
             send_error(request, 414, "URI too long")

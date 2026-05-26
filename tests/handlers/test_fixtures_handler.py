@@ -19,8 +19,8 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from cache import cache
-from handlers.fixtures_handler import serve_fixtures, _CACHE_TTL, _MAX_PLAYER_ID
-from tests.helpers import MockRequest, MockHTTPResponse, make_url_router
+from handlers.fixtures_handler import _CACHE_TTL, _MAX_PLAYER_ID, serve_fixtures
+from tests.helpers import MockHTTPResponse, MockRequest, make_url_router
 
 _FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 _BOOTSTRAP = json.loads((_FIXTURES_DIR / "bootstrap_static.json").read_text())
@@ -30,10 +30,12 @@ _EXPECTED_OUTPUT_FIELDS = {"event", "is_home", "difficulty", "team_h", "team_a"}
 
 
 def _make_mock():
-    return make_url_router({
-        "bootstrap-static": MockHTTPResponse(_BOOTSTRAP),
-        "element-summary":  MockHTTPResponse(_ELEMENT_SUMMARY),
-    })
+    return make_url_router(
+        {
+            "bootstrap-static": MockHTTPResponse(_BOOTSTRAP),
+            "element-summary": MockHTTPResponse(_ELEMENT_SUMMARY),
+        }
+    )
 
 
 class TestFixturesHandlerValidation(unittest.TestCase):
@@ -99,8 +101,9 @@ class TestFixturesHandlerCache(unittest.TestCase):
             mock_get.side_effect = _make_mock()
             serve_fixtures(request, player_id="7")
         self.assertIsNotNone(cache.get("fixtures:7"))
-        self.assertIsNone(cache.get("history:7"),
-                          "Fixture data must not be stored under history key")
+        self.assertIsNone(
+            cache.get("history:7"), "Fixture data must not be stored under history key"
+        )
 
     def test_fixtures_and_history_cache_do_not_collide(self):
         """Separate handlers for the same player ID must use separate cache keys."""
@@ -154,11 +157,13 @@ class TestFixturesHandlerResponse(unittest.TestCase):
         fixtures = self._call().response_json()
         for fixture in fixtures:
             if "team_h" in fixture:
-                self.assertIsInstance(fixture["team_h"], str,
-                                      "team_h should be a string short name")
+                self.assertIsInstance(
+                    fixture["team_h"], str, "team_h should be a string short name"
+                )
             if "team_a" in fixture:
-                self.assertIsInstance(fixture["team_a"], str,
-                                      "team_a should be a string short name")
+                self.assertIsInstance(
+                    fixture["team_a"], str, "team_a should be a string short name"
+                )
 
     def test_difficulty_is_integer(self):
         """FDR difficulty must be an integer 1–5."""
@@ -191,9 +196,12 @@ class TestFixturesHandlerErrors(unittest.TestCase):
 
     def test_network_failure_returns_502(self):
         import requests as req
+
         request = MockRequest("/api/player/1/fixtures")
-        with patch("utils.loaders.base_loader.requests.get",
-                   side_effect=req.exceptions.ConnectionError("unreachable")):
+        with patch(
+            "utils.loaders.base_loader.requests.get",
+            side_effect=req.exceptions.ConnectionError("unreachable"),
+        ):
             serve_fixtures(request, player_id="1")
         self.assertEqual(request.last_status, 502)
 
@@ -201,10 +209,12 @@ class TestFixturesHandlerErrors(unittest.TestCase):
         bad_summary = {"history": [], "history_past": []}  # fixtures key missing
         request = MockRequest("/api/player/1/fixtures")
         with patch("utils.loaders.base_loader.requests.get") as mock_get:
-            mock_get.side_effect = make_url_router({
-                "bootstrap-static": MockHTTPResponse(_BOOTSTRAP),
-                "element-summary":  MockHTTPResponse(bad_summary),
-            })
+            mock_get.side_effect = make_url_router(
+                {
+                    "bootstrap-static": MockHTTPResponse(_BOOTSTRAP),
+                    "element-summary": MockHTTPResponse(bad_summary),
+                }
+            )
             serve_fixtures(request, player_id="1")
         self.assertEqual(request.last_status, 502)
 
@@ -213,18 +223,23 @@ class TestFixturesHandlerErrors(unittest.TestCase):
         empty_summary = dict(_ELEMENT_SUMMARY, fixtures=[])
         request = MockRequest("/api/player/1/fixtures")
         with patch("utils.loaders.base_loader.requests.get") as mock_get:
-            mock_get.side_effect = make_url_router({
-                "bootstrap-static": MockHTTPResponse(_BOOTSTRAP),
-                "element-summary":  MockHTTPResponse(empty_summary),
-            })
+            mock_get.side_effect = make_url_router(
+                {
+                    "bootstrap-static": MockHTTPResponse(_BOOTSTRAP),
+                    "element-summary": MockHTTPResponse(empty_summary),
+                }
+            )
             serve_fixtures(request, player_id="1")
         self.assertEqual(request.last_status, 200)
 
     def test_error_body_does_not_leak_internals(self):
         import requests as req
+
         request = MockRequest("/api/player/1/fixtures")
-        with patch("utils.loaders.base_loader.requests.get",
-                   side_effect=req.exceptions.ConnectionError("internal/path/detail")):
+        with patch(
+            "utils.loaders.base_loader.requests.get",
+            side_effect=req.exceptions.ConnectionError("internal/path/detail"),
+        ):
             serve_fixtures(request, player_id="1")
         body = request.response_body().decode()
         self.assertNotIn("internal/path/detail", body)

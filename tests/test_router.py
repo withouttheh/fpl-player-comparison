@@ -24,14 +24,14 @@ Why mock at the request level and not patch handler functions?
 
 import io
 import unittest
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import patch
 
 from router import Router
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 class MockRequest:
     """Minimal stand-in for BaseHTTPRequestHandler.
@@ -67,6 +67,7 @@ class MockRequest:
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 class TestRouterDispatch(unittest.TestCase):
     """Correct handler is called for valid routes."""
@@ -213,6 +214,7 @@ class TestRouterSecurityGuards(unittest.TestCase):
     def test_path_at_max_length_boundary_is_processed(self):
         """A path of exactly MAX_PATH_LENGTH characters must not be rejected."""
         from router import _MAX_PATH_LENGTH
+
         # Build a path that hits exactly the limit.
         # /api/players is 12 chars; pad query string to reach limit.
         base = "/api/players?"

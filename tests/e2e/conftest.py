@@ -26,7 +26,7 @@ from pathlib import Path
 import pytest
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
-PORT = 18000   # use a non-standard port so tests don't conflict with a dev server
+PORT = 18000  # use a non-standard port so tests don't conflict with a dev server
 
 
 @pytest.fixture(scope="session")

@@ -14,14 +14,14 @@ point is easy to read and reason about.
 import os
 import socketserver
 import sys
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from router import Router
-
 
 # ---------------------------------------------------------------------------
 # Threaded server
 # ---------------------------------------------------------------------------
+
 
 class ThreadedHTTPServer(socketserver.ThreadingMixIn, HTTPServer):
     """HTTP server that handles each request in its own thread.

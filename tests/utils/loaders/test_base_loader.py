@@ -14,16 +14,16 @@ The base_url + endpoint join is tested here because that logic lives in load_dat
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 import requests as req
+
 from utils.loaders.base_loader import BaseLoader
 
 
 class TestBaseLoaderSuccess(unittest.TestCase):
-
     def test_returns_parsed_json_on_success(self):
         loader = BaseLoader("https://example.com/api")
         mock_resp = MagicMock()
@@ -57,8 +57,9 @@ class TestBaseLoaderSuccess(unittest.TestCase):
             loader.load_data("some/")
 
         _, kwargs = mock_get.call_args
-        self.assertEqual(kwargs.get("timeout"), 10,
-                         "timeout=10 must be passed to prevent thread starvation")
+        self.assertEqual(
+            kwargs.get("timeout"), 10, "timeout=10 must be passed to prevent thread starvation"
+        )
 
     def test_raise_for_status_is_called(self):
         """Non-2xx responses must be caught via raise_for_status."""
@@ -74,18 +75,21 @@ class TestBaseLoaderSuccess(unittest.TestCase):
 
 
 class TestBaseLoaderFailures(unittest.TestCase):
-
     def test_connection_error_returns_none(self):
         loader = BaseLoader("https://example.com/api")
-        with patch("utils.loaders.base_loader.requests.get",
-                   side_effect=req.exceptions.ConnectionError("unreachable")):
+        with patch(
+            "utils.loaders.base_loader.requests.get",
+            side_effect=req.exceptions.ConnectionError("unreachable"),
+        ):
             result = loader.load_data("endpoint/")
         self.assertIsNone(result)
 
     def test_timeout_error_returns_none(self):
         loader = BaseLoader("https://example.com/api")
-        with patch("utils.loaders.base_loader.requests.get",
-                   side_effect=req.exceptions.Timeout("timed out")):
+        with patch(
+            "utils.loaders.base_loader.requests.get",
+            side_effect=req.exceptions.Timeout("timed out"),
+        ):
             result = loader.load_data("endpoint/")
         self.assertIsNone(result)
 
@@ -103,8 +107,10 @@ class TestBaseLoaderFailures(unittest.TestCase):
     def test_network_failure_does_not_raise(self):
         """load_data must never propagate an exception to its caller."""
         loader = BaseLoader("https://example.com/api")
-        with patch("utils.loaders.base_loader.requests.get",
-                   side_effect=req.exceptions.ConnectionError("network down")):
+        with patch(
+            "utils.loaders.base_loader.requests.get",
+            side_effect=req.exceptions.ConnectionError("network down"),
+        ):
             try:
                 loader.load_data("endpoint/")
             except Exception as exc:

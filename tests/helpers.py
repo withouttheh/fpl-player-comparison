@@ -76,9 +76,7 @@ class MockHTTPResponse:
     def raise_for_status(self):
         """Raise requests.HTTPError if status_code indicates a failure."""
         if self.status_code >= 400:
-            raise requests.exceptions.HTTPError(
-                f"HTTP {self.status_code}", response=self
-            )
+            raise requests.exceptions.HTTPError(f"HTTP {self.status_code}", response=self)
 
     def json(self):
         return self._data
@@ -100,6 +98,7 @@ def make_url_router(routes: dict):
     If no route matches, ConnectionError is raised — this makes unexpected
     URL calls fail loudly in tests rather than silently returning None.
     """
+
     def _side_effect(url: str, **kwargs):
         for substring, response in routes.items():
             if substring in url:
