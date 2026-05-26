@@ -41,8 +41,8 @@ class ElementsLoader(BootstrapStaticLoader):
 
     def get_elements_data(self):
         """Return a DataFrame of all players, or None if the fetch failed."""
-        if self.data is not None and 'elements' in self.data:
-            return pd.DataFrame(self.data['elements'])
+        if self.data is not None and "elements" in self.data:
+            return pd.DataFrame(self.data["elements"])
         return None
 
 
@@ -54,4 +54,4 @@ class TeamsLoader(BootstrapStaticLoader):
 
     def get_teams_data(self):
         """Return a DataFrame of all Premier League teams."""
-        return pd.DataFrame(self.data['teams'])
+        return pd.DataFrame(self.data["teams"])

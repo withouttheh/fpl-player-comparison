@@ -30,8 +30,7 @@ import mimetypes
 import sys
 from pathlib import Path
 
-from handlers.base_handler import send_file, send_error
-
+from handlers.base_handler import send_error, send_file
 
 # Absolute path to the static directory.
 # Resolved once at import time — all per-request paths are checked
@@ -56,7 +55,7 @@ def serve_static(request, **kwargs) -> None:
     **kwargs:
         Not used. Present for uniform handler signature compatibility.
     """
-    from urllib.parse import urlparse, unquote
+    from urllib.parse import unquote, urlparse
 
     raw_path: str = urlparse(request.path).path
 

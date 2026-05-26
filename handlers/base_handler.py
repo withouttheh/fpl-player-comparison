@@ -25,12 +25,11 @@ Why functions and not a class?
 """
 
 import json
-import sys
-
 
 # ---------------------------------------------------------------------------
 # Security headers
 # ---------------------------------------------------------------------------
+
 
 def _send_security_headers(request) -> None:
     """Write security response headers that apply to every response.
@@ -110,6 +109,7 @@ def _send_security_headers(request) -> None:
 # ---------------------------------------------------------------------------
 # Response helpers
 # ---------------------------------------------------------------------------
+
 
 def send_json(request, data: object, status: int = 200) -> None:
     """Serialise data to JSON and write a complete HTTP response.

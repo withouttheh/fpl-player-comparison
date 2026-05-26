@@ -19,13 +19,13 @@ from utils.preprocessors.base_preprocessor import BasePreprocessor
 
 
 class ElementsPreprocessor(BasePreprocessor):
-	"""Preprocesses the elements (player roster) DataFrame from bootstrap-static."""
+    """Preprocesses the elements (player roster) DataFrame from bootstrap-static."""
 
-	def __init__(self, data, teams_data):
-		super().__init__(data, teams_data)
+    def __init__(self, data, teams_data):
+        super().__init__(data, teams_data)
 
-	def preprocess_elements(self, team_columns):
-		"""Add full_name and position columns, then resolve team IDs in team_columns to short names."""
-		self.create_full_name()
-		self.map_element_type_to_position()
-		return self.replace_team_ids_with_names(team_columns)
+    def preprocess_elements(self, team_columns):
+        """Add full_name and position columns, then resolve team IDs in team_columns to short names."""
+        self.create_full_name()
+        self.map_element_type_to_position()
+        return self.replace_team_ids_with_names(team_columns)

@@ -20,14 +20,13 @@ Fields returned:
 import sys
 
 from cache import cache
-from handlers.base_handler import send_json, send_error
+from handlers.base_handler import send_error, send_json
 from utils.config import base_url
 from utils.loaders.bootstrap_static_loader import TeamsLoader
 from utils.loaders.elements_summary_loader import FixturesLoader
 from utils.preprocessors.elements_summary_preprocessors import FixturesPreprocessor
 
-
-_CACHE_TTL = 3600       # 1 hour
+_CACHE_TTL = 3600  # 1 hour
 _MAX_PLAYER_ID = 2000
 
 

@@ -27,15 +27,14 @@ Cache TTL:
 import sys
 
 from cache import cache
-from handlers.base_handler import send_json, send_error
+from handlers.base_handler import send_error, send_json
 from utils.config import base_url
 from utils.loaders.bootstrap_static_loader import TeamsLoader
 from utils.loaders.elements_summary_loader import HistoryLoader
 from utils.preprocessors.elements_summary_preprocessors import HistoryPreprocessor
 
-
-_CACHE_TTL = 300        # 5 minutes
-_MAX_PLAYER_ID = 2000   # upper bound for valid FPL player IDs
+_CACHE_TTL = 300  # 5 minutes
+_MAX_PLAYER_ID = 2000  # upper bound for valid FPL player IDs
 
 # Fields sent to the frontend. The full history row has ~40 columns;
 # we send only what the charts and tables need.
@@ -138,9 +137,14 @@ def _fetch_and_process(player_id: int) -> list[dict]:
     # The FPL API returns these as strings (e.g. "2.3"), not numbers.
     # The frontend expects floats for chart rendering.
     float_cols = [
-        "influence", "creativity", "threat", "ict_index",
-        "expected_goals", "expected_assists",
-        "expected_goal_involvements", "expected_goals_conceded",
+        "influence",
+        "creativity",
+        "threat",
+        "ict_index",
+        "expected_goals",
+        "expected_assists",
+        "expected_goal_involvements",
+        "expected_goals_conceded",
     ]
     for col in float_cols:
         if col in df.columns:

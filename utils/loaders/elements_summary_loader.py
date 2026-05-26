@@ -27,47 +27,46 @@ from utils.loaders.base_loader import BaseLoader
 
 
 class ElementsSummaryLoader(BaseLoader):
-	"""Fetches /element-summary/{element_id}/ for a single player.
+    """Fetches /element-summary/{element_id}/ for a single player.
 
-	The response contains three keys: 'fixtures' (upcoming), 'history' (this season),
-	and 'history_past' (previous seasons). Subclasses extract each section.
-	"""
+    The response contains three keys: 'fixtures' (upcoming), 'history' (this season),
+    and 'history_past' (previous seasons). Subclasses extract each section.
+    """
 
-	def __init__(self, base_url, element_id):
-		super().__init__(base_url)
-		self.endpoint = f"element-summary/{element_id}/"
-		self.data = self.load_data(self.endpoint)
+    def __init__(self, base_url, element_id):
+        super().__init__(base_url)
+        self.endpoint = f"element-summary/{element_id}/"
+        self.data = self.load_data(self.endpoint)
 
 
 class FixturesLoader(ElementsSummaryLoader):
-	"""Extracts upcoming fixtures for a player."""
+    """Extracts upcoming fixtures for a player."""
 
-	def __init__(self, base_url, element_id=1):
-		super().__init__(base_url, element_id)
+    def __init__(self, base_url, element_id=1):
+        super().__init__(base_url, element_id)
 
-	def get_fixtures_data(self):
-		"""Return a DataFrame of upcoming fixtures for this player."""
-		return pd.DataFrame(self.data['fixtures'])
+    def get_fixtures_data(self):
+        """Return a DataFrame of upcoming fixtures for this player."""
+        return pd.DataFrame(self.data["fixtures"])
 
 
 class HistoryLoader(ElementsSummaryLoader):
-	"""Extracts this-season gameweek history for a player."""
+    """Extracts this-season gameweek history for a player."""
 
-	def __init__(self, base_url, element_id=1):
-		super().__init__(base_url, element_id)
+    def __init__(self, base_url, element_id=1):
+        super().__init__(base_url, element_id)
 
-	def get_history_data(self):
-		"""Return a DataFrame of per-gameweek stats for this player this season."""
-		return pd.DataFrame(self.data['history'])
+    def get_history_data(self):
+        """Return a DataFrame of per-gameweek stats for this player this season."""
+        return pd.DataFrame(self.data["history"])
 
 
 class HistoryPastLoader(ElementsSummaryLoader):
-	"""Extracts previous-season summary stats for a player."""
+    """Extracts previous-season summary stats for a player."""
 
-	def __init__(self, base_url, element_id=1):
-		super().__init__(base_url, element_id)
+    def __init__(self, base_url, element_id=1):
+        super().__init__(base_url, element_id)
 
-	def get_history_past_data(self):
-		"""Return a DataFrame of per-season totals for this player."""
-		return pd.DataFrame(self.data['history_past'])
- 
+    def get_history_past_data(self):
+        """Return a DataFrame of per-season totals for this player."""
+        return pd.DataFrame(self.data["history_past"])

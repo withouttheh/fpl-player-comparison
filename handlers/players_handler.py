@@ -28,11 +28,10 @@ now_cost is divided by 10 here (not in the frontend) because:
 import sys
 
 from cache import cache
-from handlers.base_handler import send_json, send_error
+from handlers.base_handler import send_error, send_json
 from utils.config import base_url
 from utils.loaders.bootstrap_static_loader import ElementsLoader, TeamsLoader
 from utils.preprocessors.bootstrap_static_preprocessors import ElementsPreprocessor
-
 
 # Cache key for the processed players list.
 _CACHE_KEY = "players"
